@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Ensure container takes up at least 80% of viewport height */
+        background-color: #f8f9fa; /* Light background color */
+    }
+
+    .login-form {
+        width: 400px;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-form h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+    .btn-secondary{
+        background-color: #6c757d;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0069d9;
+    }
+
+    .forgot-password {
+        text-align: center;
+        margin-top: 10px;
+    }
+    .or-divide{
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-form">
+        <h2>Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember Me</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+            <div class="or-divide"><span>or</span></div>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+            <div class="forgot-password">
+                <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

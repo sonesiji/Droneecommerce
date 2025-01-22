@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+  }
+
+  .dashboard {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    height: 80vh;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .card {
+    width: 220px;
+    height: 160px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .card .icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+  .card h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: bold;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>
+
+<div class="dashboard">
+  <div class="card">
+    <a href="{% url 'order_list' %}">
+      <i class="fas fa-box-open icon"></i>
+      <h3>My Orders</h3>
+    </a>
+  </div>
+
+  <div class="card">
+    <a href="my_payments.html">
+      <i class="fas fa-wallet icon"></i>
+      <h3>My Payments</h3>
+    </a>
+  </div>
+
+  <div class="card">
+    <a href="{% url 'edit_customer' %}">
+      <i class="fas fa-user-edit icon"></i>
+      <h3>My Profile</h3>
+    </a>
+  </div>
+
+  <div class="card">
+    <a href="{% url 'address_list' %}">
+      <i class="fas fa-map-marked-alt icon"></i>
+      <h3>My Addresses</h3>
+    </a>
+  </div>
+</div>
+{% endblock %}

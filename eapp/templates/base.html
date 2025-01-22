@@ -1,0 +1,785 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Thread Hub</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="{% static 'site.html' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="{% static 'img/favicon.png' %}"
+    />
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/animate.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/meanmenu.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/default.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}" />
+  </head>
+
+  <body>
+    <!-- preloader -->
+    <div id="preloader">
+      <div class="preloader">
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <!-- preloader end  -->
+    {% if user.is_staff %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete Confirmation</title>
+<style>
+  .menu-link {
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+  padding: 15px 20px; /* Larger buttons with more padding */
+  font-size: 18px; /* Larger text */
+  margin-right: 30px; /* Space between buttons */
+  transition: all 0.3s ease; /* Smooth transition */
+}
+
+/* Hover effect with underline */
+.menu-link:hover {
+  border-bottom: 3px solid #000; /* Line under text */
+  transform: scale(1.1); /* Slightly enlarge the button on hover */
+  color: #000; /* Optionally change the color when hovered */
+}
+
+/* Focus effect when clicked/tapped */
+.menu-link:focus {
+  outline: none; /* Remove default outline */
+  border-bottom: 3px solid #000; /* Line under text */
+  transform: scale(1.1); /* Keep button enlarged on focus */
+}
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('{% static "img/admindash.jpg" %}');;
+    background-size: cover;
+    backdrop-filter: blur(8px);
+  }
+
+  .card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+
+  .card h2 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .card p {
+    margin-bottom: 20px;
+    color: #666;
+  }
+
+  .card form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card form input[type="submit"], .card form a {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    text-decoration: none;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .card form input[type="submit"] {
+    background-color: #ff3333; /* Red color for Delete button */
+  }
+
+  .card form a {
+    background-color: #3333ff; /* Blue color for Cancel button */
+  }
+
+  .card form input[type="submit"]:hover, .card form a:hover {
+    background-color: #cc0000; /* Darker red color on hover for Delete button */
+  }
+
+  .card form a:hover {
+    background-color: #0000cc; /* Darker blue color on hover for Cancel button */
+  }
+
+  .footer {
+    font-family: 'Arial', sans-serif;
+    background: #1e1e1e;
+    color: #fff;
+    padding-top: 40px;
+  }
+
+  .footer-top {
+    padding-bottom: 40px;
+    border-bottom: 1px solid #444;
+    animation: fadeIn 2s ease-in-out;
+  }
+
+  .footer h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #f9a825;
+    position: relative;
+  }
+
+  .footer h3::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 2px;
+    background: #f9a825;
+    margin-top: 5px;
+  }
+
+  .footer p {
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+  }
+
+  .footer-links li {
+    margin-bottom: 10px;
+  }
+
+  .footer-links a {
+    color: #aaa;
+    text-decoration: none;
+    transition: color 0.3s, transform 0.3s;
+  }
+
+  .footer-links a:hover {
+    color: #f9a825;
+    transform: translateX(5px);
+  }
+
+  .newsletter-form {
+    display: flex;
+    gap: 10px;
+    animation: fadeInUp 1.5s ease-in-out;
+  }
+
+  .newsletter-form input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #333;
+    color: #fff;
+  }
+
+  .newsletter-form button {
+    background: #f9a825;
+    color: #1e1e1e;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  .newsletter-form button:hover {
+    background: #d18e07;
+    transform: scale(1.05);
+  }
+
+  .footer-bottom {
+    background: #181818;
+    padding: 20px 0;
+  }
+
+  .footer-bottom p {
+    margin: 0;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  .social-icons {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 10px;
+  }
+
+  .social-icons li a {
+    color: #aaa;
+    font-size: 18px;
+    transition: color 0.3s, transform 0.3s;
+  }
+
+  .social-icons li a:hover {
+    color: #f9a825;
+    transform: translateY(-3px);
+  }
+
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 2s ease-in-out;
+  }
+
+  .slide-in {
+    animation: slideIn 2s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <h5 class="mb-0">Admin, Please Logout</h5>
+    <p class="mb-4">Before Leaving The Page!</p>
+    <a href="{% url 'logout' %}" class="btn btn-primary">Log-Out</a>
+  </div>
+</div>
+
+</body>
+</html>
+
+{% elif user.seller %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete Confirmation</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('{% static "img/sellerdash.jpg" %}');;
+    background-size: cover;
+    backdrop-filter: blur(8px);
+  }
+
+  .card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+
+  .card h2 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .card p {
+    margin-bottom: 20px;
+    color: #666;
+  }
+
+  .card form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card form input[type="submit"], .card form a {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    text-decoration: none;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .card form input[type="submit"] {
+    background-color: #ff3333; /* Red color for Delete button */
+  }
+
+  .card form a {
+    background-color: #3333ff; /* Blue color for Cancel button */
+  }
+
+  .card form input[type="submit"]:hover, .card form a:hover {
+    background-color: #cc0000; /* Darker red color on hover for Delete button */
+  }
+
+  .card form a:hover {
+    background-color: #0000cc; /* Darker blue color on hover for Cancel button */
+  }
+  
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <h5 class="mb-0">Seller, Please Logout</h5>
+    <p class="mb-4">Before Leaving The Page!</p>
+    <a href="{% url 'logout' %}" class="btn btn-primary">Log-Out</a>
+  </div>
+</div>
+
+</body>
+</html>
+
+{% else %}
+    <!-- header start -->
+    <header class="transparent-header transparent-header-2">
+      <div class="header-area box-90">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div
+              class="col-xl-2 col-lg-6 col-md-6 col-7 col-sm-3 d-flex align-items-center"
+            >
+              
+             <div class="logo">
+  <a href="index.html">
+    <img src="{% static 'img/logo/Quickbuylogo.svg' %}" alt="" style="width: 100px; height: auto;" />
+  </a>
+</div>
+
+            </div>
+            <div class="col-xl-7 col-lg-6 col-md-8 col-8 d-none d-xl-block">
+              <div class="main-menu menu-orange text-center">
+                  <nav id="mobile-menu">
+                      <ul>
+                          <li>
+                              <a href="{% url 'index' %}" class="menu-link">Home</a>
+                          </li>
+                          <li class="mega-menu">
+                              <a href="{% url 'product_list' %}" class="menu-link">Shop</a>
+                          </li>
+                          <li>
+                              <a href="{% url 'order_list' %}" class="menu-link">Orders</a>
+                          </li>
+                          <li>
+                              <a href="#" class="menu-link">About</a>
+                          </li>
+                      </ul>
+                  </nav>
+              </div>
+          </div>
+          
+            
+            <div class="col-xl-3 col-lg-6 col-md-6 col-5 col-sm-9 pl-0">
+              <div class="header-right f-right">
+                <ul>
+                  <li class="search-btn">
+                    <a class="search-btn nav-search search-trigger" href="#"
+                      ><i class="fas fa-search"></i
+                    ></a>
+                  </li>
+                  {% if user.is_authenticated %}
+                  <!-- If user is authenticated, display account button and logout button -->
+                  <li class="d-shop-cart">
+                    <a href="{% url 'customer_dashboard' %}"
+                      ><i class="far fa-user"></i
+                    ></a>
+                    <ul class="minicart">
+                      <li>
+                        <a href="{% url 'checkout' %}">Checkout</a>
+                      </li>
+
+                      <li>
+                        <a href="{% url 'edit_customer' %}">Profile</a>
+                      </li>
+                      <li>
+                        <a href="{% url 'address_list' %}">Adresses</a>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li>
+                    <a href="{% url 'logout' %}"
+                      ><i class="fas fa-sign-out-alt"></i>
+                    </a>
+                  </li>
+                  {% else %}
+                  <!-- If user is not authenticated, display login button -->
+                  <li class="login-btn">
+                    <a href="{% url 'login' %}" class="login-link">
+                        <i class="fas fa-user"></i> 
+                      
+                    </a>
+                </li>
+                  {% endif %}
+      
+                  <li class="cart-btn">
+          <a href="{% url 'cart' %}" class="cart-link">
+              <span class="cart-icon">
+                  <i class="fas fa-shopping-cart"></i> <span class="cart-count">(0)</span> </span>
+             
+          </a>
+      </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-12 d-xl-none">
+              <div class="mobile-menu"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- header end -->
+
+    <!-- Bootstrap Modal -->
+    {% if messages %}
+        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
+    {% block content %} {% endblock %}
+
+    <!-- footer start -->
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="row">
+            <!-- About Us Section -->
+            <div class="col-lg-4 col-md-6 mb-4 footer-section fade-in">
+              <h3>About Us</h3>
+              <p>
+                We empower businesses with cutting-edge solutions that enhance growth and innovation. Your goals are our inspiration.
+              </p>
+              <p><strong>Email:</strong> <a href="mailto:sonesiji2020@gmail.com">sonesiji2020@gmail.com</a></p>
+              <p><strong>Phone:</strong> <a href="tel:+918590251658">+91 8590251658</a></p>
+            </div>
+            <!-- Quick Links Section -->
+            <div class="col-lg-2 col-md-6 mb-4 footer-section zoom-in">
+              <h3>Quick Links</h3>
+              <ul class="footer-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="#">Portfolio</a></li>
+                <li><a href="#">Contact</a></li>
+              </ul>
+            </div>
+            <!-- Resources Section -->
+            <div class="col-lg-2 col-md-6 mb-4 footer-section zoom-in">
+              <h3>Resources</h3>
+              <ul class="footer-links">
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Case Studies</a></li>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Support</a></li>
+                <li><a href="#">Careers</a></li>
+              </ul>
+            </div>
+            <!-- Newsletter Section -->
+            <div class="col-lg-4 col-md-6 mb-4 footer-section fade-in">
+              <h3>Subscribe to Our Newsletter</h3>
+              <p>Stay updated with our latest news and offers.</p>
+              <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit">Subscribe</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container text-center">
+          <p>&copy; 2025 Quick Buy. All rights reserved.</p>
+          <ul class="social-icons">
+            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+            <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+            <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+            <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+    
+    <style>
+    /* Footer Styles */
+    .footer {
+      background: linear-gradient(135deg, #f6f5f8, #f3f4f5);
+      color: #fff;
+      padding: 40px 0;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .footer h3 {
+      color: #ffdf6c;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.8rem;
+      text-shadow: 1px 1px 2px #000;
+    }
+    
+    .footer p, .footer a {
+      color: #060606;
+    }
+    
+    .footer a:hover {
+      color: #ffdf6c;
+      text-decoration: none;
+      transform: scale(1.05);
+    }
+    
+    .footer-links {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links li a {
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    .footer-links li a:hover {
+      color: #ffdf6c;
+    }
+    
+    .newsletter-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .newsletter-form input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+    
+    .newsletter-form button {
+      background: #ff6b6b;
+      color: rgb(29, 28, 28);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease-in-out;
+    }
+    
+    .newsletter-form button:hover {
+      background: #ffdf6c;
+    }
+    
+    .footer-bottom {
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 20px;
+    }
+    
+    .social-icons {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .social-icons li a {
+      color: #191818;
+      font-size: 24px;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    
+    .social-icons li a:hover {
+      color: #ffdf6c;
+      transform: scale(1.2);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+    
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .zoom-in {
+      animation: zoomIn 1s ease-in-out;
+    }
+    </style>
+    
+
+    <!-- Fullscreen search -->
+    <div class="search-wrap">
+      <div class="search-inner">
+        <i class="fas fa-times search-close" id="search-close"></i>
+        <div class="search-cell">
+          <form
+            id="searchForm"
+            action="{% url 'search_results' %}"
+            method="GET"
+          >
+            <div class="search-field-holder">
+              <input
+                type="text"
+                name="q"
+                id="searchInput"
+                class="main-search-input"
+                placeholder="Search Entire Store..."
+              />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- JS here -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById("searchForm").submit();
+          }
+        });
+      });
+    </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- Script to show the modal -->
+  <script type="text/javascript">
+      $(document).ready(function() {
+          {% if messages %}
+              $('#messageModal').modal('show');
+          {% endif %}
+      });
+  </script>
+    <script src="{% static 'js/vendor/jquery-1.12.4.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/isotope.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/one-page-nav-min.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/jquery.meanmenu.min.js' %}"></script>
+    <script src="{% static 'js/ajax-form.js' %}"></script>
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <script src="{% static 'js/jquery.scrollUp.min.js' %}"></script>
+    <script src="{% static 'js/jquery.final-countdown.min.js' %}"></script>
+    <script src="{% static 'js/imagesloaded.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/instafeed.min.js' %}"></script>
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

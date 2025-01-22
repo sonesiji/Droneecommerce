@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        padding: 40px;
+        margin-top: 100px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        font-size: 1rem;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .form-control:focus {
+        border-color: #ff6f61;
+        box-shadow: 0 0 5px rgba(255, 111, 97, 0.5);
+    }
+
+    .btn {
+        background-color: #6a33bc;
+        color: white;
+        border-radius: 8px;
+        padding: 12px 20px;
+        width: 100%;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn:hover {
+        background-color: #ff3b2a;
+        transition: background-color 0.3s ease;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .form-check {
+        margin-top: 10px;
+    }
+
+    .form-check input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Create Your Account</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" class="form-control" id="full-name" name="full-name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone-number">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone-number" name="phone-number" placeholder="Enter your phone number" required>
+                </div>
+                <div class="form-group">
+                    <label for="your-email">Email</label>
+                    <input type="email" class="form-control" id="your-email" name="your-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('password')">
+                        <label class="form-check-label" for="password">Show Password</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('confirm-password')">
+                        <label class="form-check-label" for="confirm-password">Show Password</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility(id) {
+        var x = document.getElementById(id);
+        if (x.type === "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
+    }
+</script>
+
+{% endblock %}

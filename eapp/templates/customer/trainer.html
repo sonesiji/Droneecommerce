@@ -1,0 +1,6 @@
+<h1>Select a Trainer</h1>
+<ul>
+    {% for trainer in trainers %}
+        <li><a href="{% url 'book_slot' trainer.id %}">{{ trainer.name }}</a></li>
+    {% endfor %}
+</ul>

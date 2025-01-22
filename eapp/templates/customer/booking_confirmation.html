@@ -1,0 +1,6 @@
+<h1>Booking Confirmed</h1>
+<p>Thank you for booking with us!</p>
+<p>Trainer: {{ booking.trainer.user.get_full_name }}</p>
+<p>Date: {{ booking.date }}</p>
+<p>Time: {{ booking.start_time }} - {{ booking.end_time }}</p>
+<p>Total Cost: ₹{{ booking.total_cost }}</p>

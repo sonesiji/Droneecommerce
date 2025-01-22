@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/shop.css' %}">
+
+<!-- Shop Area -->
+<section class="shop-area py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <!-- Main Product Area -->
+      <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          
+        </div>
+        <div class="row">
+          {% for product in products %}
+          <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+              <a href="{% url 'product_detail' product.id %}">
+                <img src="{{ product.image_1.url }}" class="card-img-top" alt="{{ product.name }}">
+              </a>
+              <div class="card-body text-center">
+                <h5 class="card-title">
+                  <a href="{% url 'product_detail' product.id %}" class="text-dark text-decoration-none">{{ product.name }}</a>
+                </h5>
+                <p class="text-muted mb-2">{{ product.subcategory }}</p>
+                <p class="text-danger fw-bold">${{ product.price }}</p>
+                {% if product.quantity_in_stock > 0 %}
+                <form action="{% url 'add_to_cart' %}" method="post" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" class="btn btn-outline-primary btn-sm">Add to Cart</button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- Sidebar Area -->
+      <div class="col-lg-3">
+        <div class="bg-white p-4 rounded shadow-sm">
+          <h4 class="mb-3">Search Products</h4>
+          <form action="{% url 'search_results' %}" method="GET">
+            <input type="text" name="q" class="form-control mb-3" placeholder="Search...">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+          </form>
+          <hr>
+          <h4 class="mb-3">Filter by Price</h4>
+          <form action="{% url 'product_list' %}" method="get">
+            <label for="min_price" class="form-label">Min Price</label>
+            <input type="number" id="min_price" name="min_price" class="form-control mb-3" placeholder="Min Price" value="{{ request.GET.min_price }}">
+            <label for="max_price" class="form-label">Max Price</label>
+            <input type="number" id="max_price" name="max_price" class="form-control mb-3" placeholder="Max Price" value="{{ request.GET.max_price }}">
+            <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+          </form>
+          <hr>
+          <h4 class="mb-3">Categories</h4>
+          <ul class="list-unstyled">
+            {% for category in categories %}
+            <li>
+              <a href="{% url 'category_products' category.id %}" class="text-dark">{{ category.category_name }}</a>
+              <ul class="list-unstyled ms-3">
+                {% for subcategory in category.subcategory_set.all %}
+                <li>
+                  <a href="{% url 'subcategory_products' subcategory.id %}" class="text-muted">{{ subcategory.subcategory_name }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

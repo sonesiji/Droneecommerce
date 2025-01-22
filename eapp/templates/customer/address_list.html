@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .main-menu a {
+        color: black !important;
+    }
+
+    .container {
+        padding: 30px;
+        margin-top: 100px;
+        background: linear-gradient(135deg, #fdfcfb, #f4e2d8);
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 1.2s ease;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-custom {
+        background: linear-gradient(135deg, #fe4536, #f65a38);
+        border: none;
+        color: white;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-custom:hover {
+        background: linear-gradient(135deg, #f65a38, #fe4536);
+        transform: scale(1.05);
+    }
+
+    .card-title {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .no-address-text {
+        color: #888;
+        font-style: italic;
+        animation: fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .btn-info {
+        background-color: #3498db !important;
+        border: none;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c !important;
+        border: none;
+    }
+
+    .btn-info:hover, .btn-danger:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<div class="container">
+    <h2 class="mb-4 text-center" style="color: #fe4536; font-weight: bold;">Address List</h2>
+
+    <!-- Card for adding a new address -->
+    <div class="card mb-4" style="background: #fff5f2;">
+        <div class="card-body">
+            <h5 class="card-title">Add New Address</h5>
+            <p class="card-text">Click below to add a new address:</p>
+            <a href="{% url 'address_create' %}" class="btn btn-custom">Add Address</a>
+        </div>
+    </div>
+
+    {% if request.user.customer.address_set.all %}
+        <!-- Cards for displaying existing addresses -->
+        {% for address in request.user.customer.address_set.all %}
+        <div class="card mb-4" style="background: #f8f9fa;">
+            <div class="card-body">
+                <h5 class="card-title">{{ address.recepient_name }}</h5>
+                <p class="card-text mb-1"><strong>Contact:</strong> {{ address.recepient_contact }}</p>
+                <p class="card-text mb-1">{{ address.address_line1 }}</p>
+                <p class="card-text">{{ address.city }}, {{ address.state }} - {{ address.postal_code }}</p>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a href="{% url 'address_edit' address.id %}" class="btn btn-info btn-sm">Edit</a>
+                    <a href="{% url 'address_delete' address.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-address-text text-center mt-5">No addresses found. Start by adding a new address!</p>
+    {% endif %}
+</div>
+{% endblock %}

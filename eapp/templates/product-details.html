@@ -1,0 +1,227 @@
+{% extends 'base.html' %} {% block content %} {% load static %}
+
+<style>
+  .main-menu a {
+    color: black !important;
+  }
+
+
+</style>
+
+        <!-- breadcrumb-area-start -->
+        <section class="breadcrumb-area" data-background="img/bg/page-title.png">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="breadcrumb-text text-center">
+                            <h1>Our Shop</h1>
+                            <ul class="breadcrumb-menu">
+                                <li><a href="index.html">home</a></li>
+                                <li><span>shop details</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- breadcrumb-area-end -->
+
+        <!-- shop-area start -->
+        <section class="shop-details-area pt-100 pb-100">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-4">
+                        <div class="product-details-img mb-10">
+                          <div class="tab-content" id="myTabContentpro">
+                            <div class="tab-pane fade show active" id="home" role="tabpanel">
+                              <div class="product-large-img">
+                                <img src="{{ product.image_1.url }}" alt="" />
+                              </div>
+                            </div>
+                            <div class="tab-pane fade" id="profile" role="tabpanel">
+                              <div class="product-large-img">
+                                <img src="{{ product.image_2.url }}" alt="" />
+                              </div>
+                            </div>
+                            <div class="tab-pane fade" id="profile1" role="tabpanel">
+                              <div class="product-large-img">
+                                <img src="{{ product.image_3.url }}" alt="" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="shop-thumb-tab mb-30">
+                          <ul class="nav" id="myTab2" role="tablist">
+                            <li class="nav-item">
+                              <a
+                                class="nav-link active"
+                                id="home-tab"
+                                data-toggle="tab"
+                                href="#home"
+                                role="tab"
+                                aria-selected="true"
+                                ><img src="{{ product.image_1.url }}" alt="" />
+                              </a>
+                            </li>
+                            <li class="nav-item">
+                              <a
+                                class="nav-link"
+                                id="profile-tab"
+                                data-toggle="tab"
+                                href="#profile"
+                                role="tab"
+                                aria-selected="false"
+                                ><img src="{{ product.image_2.url }}" alt=""
+                              /></a>
+                            </li>
+                            <li class="nav-item">
+                              <a
+                                class="nav-link"
+                                id="profile-tab2"
+                                data-toggle="tab"
+                                href="#profile1"
+                                role="tab"
+                                aria-selected="false"
+                                ><img src="{{ product.image_3.url }}" alt=""
+                              /></a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    <div class="col-xl-6 col-lg-8">
+                        <div class="product-details mb-30 pl-30">
+                            <div class="details-cat mb-20">
+                                <a href="#">{{ product.subcategory }}</a>
+                            </div>
+                            <h2 class="pro-details-title mb-15">{{ product.name }}</h2>
+                            <div class="details-price mb-20">
+                                <span>${{ product.price }}</span>
+                            </div>
+                            <div class="product-variant">
+
+
+                                <!-- <div class="product-size variant-item">
+                                    <div class="variant-name">
+                                        <span>size</span>
+                                    </div>
+                                    <ul class="shop-link shop-size">
+                                        <li><a href="">xxl   </a></li>
+                                        <li class="active"><a href="">xl </a></li>
+                                        <li><a href="">lg </a></li>
+                                        <li><a href="">md  </a></li>
+                                        <li><a href="">sm </a></li>
+                                    </ul>
+                                </div> -->
+
+                                <!-- <div class="product-info-list variant-item">
+                                    <ul>
+                                        <li><span>Brands:</span> Hewlett-Packard</li>
+                                        <li><span>Product Code:</span> d12</li>
+                                        <li><span>Reward Points:</span> 100</li>
+                                        <li><span>Reward</span> <span class="in-stock">Reward</span></li>
+                                    </ul>
+                                </div> -->
+
+                                <div class="product-action-details variant-item">
+                                    <div class="product-details-action">
+                                        {% if product.quantity_in_stock == 0 %}
+                                            <span class="stock-status" style="font-size: larger; color: brown;">Out of Stock</span>
+                                        {% elif product.quantity_in_stock < product.reorder_level %}
+                                            <span class="stock-status" style="font-size: larger; color: brown;">Limited Stock</span>
+                                        {% endif %}
+                                        
+                                        {% if product.quantity_in_stock > 0 %}
+                                            <form method="POST" action="{% url 'add_to_cart' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                                <div class="plus-minus">
+                                                    <div class="cart-plus-minus">
+                                                        <input type="number" value="1" id="quantity" name="quantity" min="1" max="{{ product.quantity_in_stock }}" />
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn theme-btn">Add to Cart</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                
+
+                                <div class="tab-pane fade show active" id="home6" role="tabpanel" aria-labelledby="home-tab6">
+                                    <div class="desc-text">
+                                        {% with description_lines=product.description|linebreaks %}
+                                            {% if description_lines|length > 5 %}
+                                                <div class="short-description">
+                                                    <p>{{ product.description|safe|linebreaksbr|truncatewords_html:20 }}</p>
+                                                    <button class="btn theme-btn see-more-btn">See more</button>
+                                                </div>
+                                                <div class="full-description" style="display: none;">
+                                                    <p>{{ product.description|safe|linebreaksbr }}</p>
+                                                    <button class="btn theme-btn see-less-btn">See less</button>
+                                                </div>
+                                            {% else %}
+                                                <p>{{ product.description|safe }}</p>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-50">
+                    <div class="col-xl-8 col-lg-8">
+                        <div class="product-review">
+                            <ul class="nav review-tab" id="myTabproduct" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="home-tab6" data-toggle="tab" href="#home6" role="tab" aria-controls="home"
+                                        aria-selected="true">Description </a>
+                                </li>
+                                <!-- <li class="nav-item">
+                                    <a class="nav-link" id="profile-tab6" data-toggle="tab" href="#profile6" role="tab" aria-controls="profile"
+                                        aria-selected="false">Reviews (2)</a>
+                                </li> -->
+                            </ul>
+                            <div class="tab-content" id="myTabContent2">
+                                <div class="tab-pane fade show active" id="home6" role="tabpanel" aria-labelledby="home-tab6">
+                                    <div class="desc-text">
+                                        <p>{{ product.decription|safe }}</p>
+                                        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
+                                        ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,
+                                        adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4">
+                        <div class="pro-details-banner">
+                            <a href="shop.html"><img src="{{ product.image_3.url }}" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- shop-area end -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var seeMoreBtn = document.querySelector('.see-more-btn');
+                var seeLessBtn = document.querySelector('.see-less-btn');
+                var shortDescription = document.querySelector('.short-description');
+                var fullDescription = document.querySelector('.full-description');
+        
+                seeMoreBtn.addEventListener('click', function() {
+                    shortDescription.style.display = 'none';
+                    fullDescription.style.display = 'block';
+                });
+        
+                seeLessBtn.addEventListener('click', function() {
+                    fullDescription.style.display = 'none';
+                    shortDescription.style.display = 'block';
+                });
+            });
+        </script>
+        
+        
+    {% endblock %}
+ 
