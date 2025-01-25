@@ -33,17 +33,13 @@
       <div class="col-xl-9 col-lg-8">
         <!-- tab filter -->
         <div class="row mb-10">
-          <div class="col-xl-5 col-lg-6 col-md-6">
-            <div class="product-showing mb-40">
-              <p>Showing 1–22 of 32 results</p>
-            </div>
-          </div>
+         
           <div class="col-xl-7 col-lg-6 col-md-6">
             <div class="shop-tab f-right">
               <ul class="nav text-center" id="myTab" role="tablist">
               </ul>
             </div>
-            >
+            
           </div>
         </div>
         <!-- tab content -->
@@ -92,7 +88,7 @@
                     </h4>
                     <div class="product-meta">
                       <div class="pro-price">
-                        <span>${{ product.price }}</span>
+                        <span>Rs {{ product.price }}</span>
                       </div>
                     </div>
                   </div>
@@ -114,140 +110,26 @@
             <div class="shop-widget">
                 <h3 class="shop-title">Search by</h3>
                 <form action="{% url 'search_results' %}" method="GET" class="shop-search">
-                  <input type="text" name="q" placeholder="Your keyword...." />
+                  <input type="text" name="q" placeholder="Your keyword" />
                   <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
               </div>
 
-            <div class="shop-widget">
-              <h3 class="shop-title">Filter selection</h3>
-              <div class="price-filter">
-                <div id="slider-range"></div>
-                <input type="text" id="amount" />
-              </div>
-            </div>
+            
               
 
-            <div class="shop-widget">
-              <h3 class="shop-title">Tags</h3>
-              <ul class="shop-tag">
-                <li><a href="shop.html"> Minimal</a></li>
-                <li><a href="shop.html"> T-Shirts</a></li>
-                <li><a href="shop.html"> Pants</a></li>
-                <li><a href="shop.html"> Jeants</a></li>
-                <li><a href="shop.html"> Winter</a></li>
-                <li><a href="shop.html"> Latest</a></li>
-                <li><a href="shop.html"> New</a></li>
-                <li><a href="shop.html"> Sale</a></li>
-              </ul>
-            </div>
-            <div class="shop-widget">
-              <h3 class="shop-title">color</h3>
-              <ul class="shop-link">
-                <li>
-                  <a href="shop.html"><span class="blue"></span> Blue</a>
-                </li>
-                <li>
-                  <a href="shop.html"><span class="green"></span> Green</a>
-                </li>
-                <li>
-                  <a href="shop.html"><span class="orange"></span> Orange</a>
-                </li>
-                <li>
-                  <a href="shop.html"><span class="navy"></span> Navy</a>
-                </li>
-                <li>
-                  <a href="shop.html"
-                    ><span class="pinkish"></span> Pinkish</a
-                  >
-                </li>
-                <li>
-                  <a href="shop.html"
-                    ><span class="vista"></span> Vista Blue</a
-                  >
-                </li>
-              </ul>
-            </div>
+           
+            
 
-            <div class="shop-widget">
-              <h3 class="shop-title">Recent Product</h3>
-              <ul class="shop-sidebar-product">
-                <li>
-                  <div class="side-pro-img">
-                    <a href="product-details.html"
-                      ><img src="img/product/latest/shop-rsp3.jpg" alt=""
-                    /></a>
-                  </div>
-                  <div class="side-pro-content">
-                    <div class="side-pro-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                    </div>
-                    <h5>
-                      <a href="product-details.html">Raglan Baseball-Style</a>
-                    </h5>
-                    <div class="side-pro-price">
-                      <span>$119.00 USD</span>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="side-pro-img">
-                    <a href="product-details.html"
-                      ><img src="img/product/latest/shop-rsp2.jpg" alt=""
-                    /></a>
-                  </div>
-                  <div class="side-pro-content">
-                    <div class="side-pro-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                    </div>
-                    <h5>
-                      <a href="product-details.html">Raglan Baseball-Style</a>
-                    </h5>
-                    <div class="side-pro-price">
-                      <span>$119.00 USD</span>
-                    </div>
-                  </div>
-                </li>
-                <li>
-                  <div class="side-pro-img">
-                    <a href="product-details.html"
-                      ><img src="img/product/latest/shop-rsp4.jpg" alt=""
-                    /></a>
-                  </div>
-                  <div class="side-pro-content">
-                    <div class="side-pro-rating">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                    </div>
-                    <h5>
-                      <a href="product-details.html">Raglan Baseball-Style</a>
-                    </h5>
-                    <div class="side-pro-price">
-                      <span>$119.00 USD</span>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
+            
 
-            <div class="shop-widget">
+            <!-- <div class="shop-widget">
               <div class="shop-sidebar-banner">
                 <a href="shop.html"
                   ><img src="img/banner/shop-banner.jpg" alt=""
                 /></a>
               </div>
-            </div>
+            </div> -->
           </div>
       </div>
     </div>

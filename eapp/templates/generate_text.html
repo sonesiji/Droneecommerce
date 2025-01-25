@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Enabled Chatbot</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f09433; /* Start of Instagram gradient */
+            background-image: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            animation: slideIn 1s ease-out;
+        }
+        .header {
+            background-color: #151517; /* Instagram blue */
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #357abd;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header .title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .header .back-button {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .header .back-button:hover {
+            color: #ddd;
+        }
+        .chat-content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 30%;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f4f4f4;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .sidebar .message {
+            border: 1px solid #ddd;
+            background-color: #ffffff;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .sidebar .message:hover {
+            background-color: #e1e1e1;
+            transform: scale(1.02);
+        }
+        .chatbox {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #f9f9f9;
+            color: #333;
+            width: 70%;
+            position: relative;
+            box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+        .message {
+            padding: 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            width: fit-content;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+            line-height: 1.4;
+        }
+        .message.bot {
+            background-color: #833ab4; /* Instagram purple */
+            background-image: linear-gradient(90deg, #833ab4 0%, #5851db 50%, #405de6 100%);
+            color: white;
+            align-self: flex-start;
+            border: none;
+        }
+        .message.user {
+            background-color: #fd1d1d; /* Instagram red */
+            background-image: linear-gradient(90deg, #fd1d1d 0%, #f56040 50%, #f09433 100%);
+            color: white;
+            align-self: flex-end;
+            border: none;
+        }
+        .message .author {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .message-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #ffffff;
+            align-items: center;
+            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .message-input textarea {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 15px;
+            border: 1px solid #ddd;
+            resize: none;
+            overflow: hidden;
+            background-color: #f1f1f1;
+            color: #333;
+            height: 40px;
+            transition: height 0.2s;
+        }
+        .message-input button {
+            background-color: #833ab4;
+            background-image: linear-gradient(90deg, #833ab4 0%, #fd1d1d 50%, #f09433 100%);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.2s;
+            font-size: 1.2em;
+        }
+        .message-input button:hover {
+            background-color: #bc1888;
+        }
+        .message-input button:active {
+            transform: scale(0.95);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        /* Custom scrollbar */
+        .chatbox::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chatbox::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 10px;
+        }
+        .chatbox::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <button class="back-button" onclick="window.location.href='/'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <span class="title">Chat with Christ Bot</span>
+            <div></div>
+            <button class="toggle-button" onclick="toggleSidebar()">
+                <i class="fas fa-angle-left"></i>
+            </button>
+        </div>
+        <div class="chat-content">
+            <div class="sidebar">
+                <h2>Previous Messages</h2>
+                <div id="sidebarMessages">
+                    <button class="toggle-button" onclick="toggleSidebar()">
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                    <!-- Previous messages will be added here dynamically -->
+                </div>
+            </div>
+            <div class="chatbox" id="chatbox">
+                <!-- Chat messages will be dynamically added here -->
+            </div>
+        </div>
+        <div class="message-input">
+            <textarea id="userInput" rows="1" placeholder="Send a message..."></textarea>
+            <button onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        const messageHistory = JSON.parse(localStorage.getItem('messageHistory')) || [];
+
+        function updateSidebar() {
+            const sidebarMessages = document.getElementById('sidebarMessages');
+            sidebarMessages.innerHTML = '';
+            messageHistory.forEach(entry => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.textContent = entry.question;
+                messageDiv.dataset.index = entry.index;
+                messageDiv.onclick = () => {
+                    const chatbox = document.getElementById('chatbox');
+                    chatbox.innerHTML = entry.messages.join('');
+                    chatbox.scrollTop = chatbox.scrollHeight;
+                };
+                sidebarMessages.appendChild(messageDiv);
+            });
+        }
+
+        function sanitizeInput(input) {
+            return input.replace(/\*/g, '').trim();
+        }
+
+        function sanitizeOutput(output) {
+            return output.replace(/\*/g, '').trim();
+        }
+
+        function addToSidebar(question, index) {
+            const sidebarMessages = document.getElementById('sidebarMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.textContent = question;
+            messageDiv.dataset.index = index;
+            messageDiv.onclick = () => {
+                const chatbox = document.getElementById('chatbox');
+                chatbox.innerHTML = messageHistory[index].messages.join('');
+                chatbox.scrollTop = chatbox.scrollHeight;
+            };
+            sidebarMessages.appendChild(messageDiv);
+        }
+
+        async function sendMessage() {
+            let message = document.getElementById('userInput').value;
+
+            message = sanitizeInput(message);
+
+            if (message === "") return;
+
+            const chatbox = document.getElementById('chatbox');
+            const userMessageHTML = `<div class="message user"><span class="author">You:</span> ${message}</div>`;
+            chatbox.innerHTML += userMessageHTML;
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            const index = messageHistory.length;
+            messageHistory.push({
+                question: `You: ${message}`,
+                messages: [userMessageHTML]
+            });
+            addToSidebar(`You: ${message}`, index);
+
+            document.getElementById('userInput').value = '';
+
+            try {
+                const response = await fetch('{% url "generate_text" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: new URLSearchParams({
+                        'input_text': message,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                let botResponse = data.generated_text ? sanitizeOutput(data.generated_text) : 'No response from bot.';
+                
+                const botMessageHTML = `<div class="message bot"><span class="author">Christ BOT:</span> ${botResponse}</div>`;
+                chatbox.innerHTML += botMessageHTML;
+                chatbox.scrollTop = chatbox.scrollHeight;
+
+                messageHistory[index].messages.push(userMessageHTML, botMessageHTML);
+                addToSidebar(`Christ Bot: ${botResponse}`, index);
+            } catch (error) {
+                const errorMessageHTML = `<div class="message bot"><span class="author">Christ Bot:</span> Error: ${error.message}</div>`;
+                chatbox.innerHTML += errorMessageHTML;
+                chatbox.scrollTop = chatbox.scrollHeight;
+
+                messageHistory[index].messages.push(userMessageHTML, errorMessageHTML);
+                addToSidebar(`Christ Bot: Error: ${error.message}`, index);
+            }
+
+            localStorage.setItem('messageHistory', JSON.stringify(messageHistory));
+        }
+
+        document.getElementById('userInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Prevents new line in textarea
+                sendMessage();
+            }
+        });
+
+        // Auto-resize the textarea
+        const textarea = document.getElementById('userInput');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Initialize sidebar on page load
+        updateSidebar();
+        function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const chatbox = document.getElementById('chatbox'); // Adjust this ID to your chatbox's ID
+    const toggleButton = document.querySelector('.toggle-button i');
+
+    // Check if sidebar is currently hidden
+    if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+        sidebar.style.display = 'block'; // Show sidebar
+        toggleButton.classList.remove('fa-angle-right');
+        toggleButton.classList.add('fa-angle-left');
+        chatbox.style.width = '70%'; // Adjust chatbox width
+    } else {
+        sidebar.style.display = 'none'; // Hide sidebar
+        toggleButton.classList.remove('fa-angle-left');
+        toggleButton.classList.add('fa-angle-right');
+        chatbox.style.width = '100%'; // Adjust chatbox width
+    }
+}
+
+
+    </script>
+</body>
+</html>

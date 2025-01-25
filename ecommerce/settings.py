@@ -115,6 +115,9 @@ USE_I18N = True
 USE_TZ = True
 
 
+# myproject/settings.py
+GEMINI_API_KEY = 'AIzaSyBvgdIgptWKRrICvcbmp5uSfmxDN974rkQ'
+GEMINI_API_URL = 'https://api.gemini.com/v1'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -129,26 +132,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'tdaseadsdasd1@gmail.com'
-EMAIL_HOST_PASSWORD = 'jygjygjgjgjgkgk'
+EMAIL_HOST_USER = 'sonesiji2020@gmail.com'
+EMAIL_HOST_PASSWORD = 'mwwylubblnewwpcs'
 
 LOGIN_URL = 'login'
 
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "AdminDashboard",
+    "site_title": "ADMIN PAGE",
 
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_header": "ThreadHub",
+    "site_header": "QUICK BUY",
     
     # Logo to use for your site, must be present in static files, used for brand on top left
-    "site_logo": "img\logo\logo.png",
+    # "site_logo": "img\Favicon.png",
     
     # CSS classes that are applied to the logo above
     "site_logo_classes": "img-square",
@@ -196,9 +200,9 @@ JAZZMIN_SETTINGS = {
     "order_with_respect_to": ["eapp.Customer", "eapp.Seller","eapp.Category","eapp.Product"],
 
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_brand": "ThreadHub",
-    "welcome_sign": "Welcome to the AdminDashboard",
-    "copyright": "ThreadHub  Ltd",
+    "site_brand": "QUICK BUY",
+    "welcome_sign": " WELCOME ADMIN TO THE QUICK BUY DASHBOARD",
+    "copyright": "Quick Buy",
      "icons": {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",

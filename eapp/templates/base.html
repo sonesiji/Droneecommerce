@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Thread Hub</title>
+    <title>Quick Buy</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="manifest" href="{% static 'site.html' %}" />
@@ -15,7 +15,7 @@
     <link
       rel="shortcut icon"
       type="image/x-icon"
-      href="{% static 'img/favicon.png' %}"
+      href="{% static 'img/favicon1.png' %}"
     />
 
     <!-- CSS here -->
@@ -406,7 +406,7 @@
               
              <div class="logo">
   <a href="index.html">
-    <img src="{% static 'img/logo/Quickbuylogo.svg' %}" alt="" style="width: 100px; height: auto;" />
+    <img src="{% static 'img/favicon1.png' %}" alt="" style="width: 100px; height: auto;" />
   </a>
 </div>
 
@@ -425,7 +425,7 @@
                               <a href="{% url 'order_list' %}" class="menu-link">Orders</a>
                           </li>
                           <li>
-                              <a href="#" class="menu-link">About</a>
+                            <a href="{% url 'instructor_details' %}" class="menu-link">Drone Trainers</a>
                           </li>
                       </ul>
                   </nav>

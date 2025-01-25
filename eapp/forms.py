@@ -30,15 +30,15 @@ class AddressForm(forms.ModelForm):
         
         
 
-from django import forms
-from .models import Appointment
+# from django import forms
 
-class AppointmentForm(forms.ModelForm):
-    class Meta:
-        model = Appointment
-        fields = ['user_name', 'user_email', 'phone_number', 'trainer', 'date', 'time_slot']
-        widgets = {
-            'date': forms.SelectDateWidget(),
-            'time_slot': forms.Select(),
-        }
+# from .models import Appointment
+# class AppointmentForm(forms.ModelForm):
+#     class Meta:
+#         model = Appointment
+#         fields = ['user_name', 'user_email', 'phone_number', 'trainer', 'date', 'time_slot']
+#         widgets = {
+#             'date': forms.SelectDateWidget(),
+#             'time_slot': forms.Select(),
+#         }
 

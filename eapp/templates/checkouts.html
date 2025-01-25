@@ -4,110 +4,192 @@
 {% load static %}
 
 <style>
-    .main-menu a {
-    color: black !important;
-}
+    body {
+        background-color: #f9f9f9;
+    }
 
-.container {
-    padding: 30px;
-    margin-top: 150px;
-    background-color: white;
-}
+    .container {
+        padding: 30px;
+        margin-top: 100px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
+    h3 {
+        color: #333;
+        font-weight: bold;
+    }
 
-.card {
-    margin-top: 10px;
-}
+    .card {
+        margin-top: 10px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
 
-.select-btn {
-    margin-left: 20px;
-}
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+    }
 
-.add-btn {
-    margin-top: 20px;
-}
+    .card-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
+    .select-btn {
+        margin-left: 10px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+    }
+
+    .select-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .add-btn {
+        margin-top: 20px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+    }
+
+    .add-btn:hover {
+        background-color: #218838;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .order-total td {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .order-button-payment {
+        text-align: right;
+    }
+
+    .btn.theme-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .btn.theme-btn:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    .empty-cart-message {
+        font-size: large;
+        color: #c0392b;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+    }
 </style>
-        <!-- checkout-area start -->
-        <section class="checkout-area pb-70">
-            <div class="container">
-                <form method="post" id="checkout-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="address_id" id="address-id">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="checkbox-form">
-                                <h3>Billing Details</h3>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h3>Shipping Address</h3>
-                                        {% for address in addresses %}
-                                          <div class="card">
-                                            <div class="card-body">
-                                              <p class="card-text">{{ address }}</p>
-                                              <a href="{% url 'address_edit' address.id %}" class="card-link">Edit Address</a>
-                                              <button type="button" onclick="selectAddress({{ address.id }})" class="btn theme-btn select-btn">Select</button>
-                                            </div>
-                                          </div>
-                                        {% endfor %}
-                                        <button type="button" onclick="window.location.href='{% url 'address_create' %}'" class="btn theme-btn add-btn">Add Address</button>
-                                      </div>
+
+<!-- checkout-area start -->
+<section class="checkout-area pb-70">
+    <div class="container">
+        <form method="post" id="checkout-form">
+            {% csrf_token %}
+            <input type="hidden" name="address_id" id="address-id">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="checkbox-form">
+                        <h3>Billing Details</h3>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3>Shipping Address</h3>
+                                {% for address in addresses %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <p class="card-text">{{ address }}</p>
+                                        <a href="{% url 'address_edit' address.id %}" class="card-link">Edit Address</a>
+                                        <button type="button" onclick="selectAddress({{ address.id }})" class="btn theme-btn select-btn">Select</button>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="your-order mb-30 ">
-                                <h3>Your order</h3>
-                                <div class="your-order-table table-responsive">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th class="product-name">Product</th>
-                                                <th class="product-total">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in cart_items %}
-                                            <tr class="cart_item">
-                                                <td class="product-name">
-                                                    {{ item.product.name }} <strong class="product-quantity"> × {{ item.quantity }}</strong>
-                                                </td>
-                                                <td class="product-total">
-                                                    <span class="amount">{{ item.sub_total }}</span>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr class="order-total">
-                                                <th>Order Total</th>
-                                                <td><strong><span class="amount">${{ total_price }}</span></strong>
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="order-button-payment mt-20">
-                                {% if cart_items %}
-                                <button type="submit" value="Place Order" class="btn theme-btn">Place order</button>
-                            {% else %}
-                            <p style="font-size: large; color: brown; font-weight: bold;">Your cart is empty. Please add items to proceed.</p>
-                            {% endif %}
+                                {% endfor %}
+                                <button type="button" onclick="window.location.href='{% url 'address_create' %}'" class="btn theme-btn add-btn">Add Address</button>
                             </div>
                         </div>
                     </div>
-                </form>
+                </div>
+                <div class="col-lg-6">
+                    <div class="your-order mb-30">
+                        <h3>Your order</h3>
+                        <div class="your-order-table table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="product-name">Product</th>
+                                        <th class="product-total">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart_items %}
+                                    <tr class="cart_item">
+                                        <td class="product-name">
+                                            {{ item.product.name }} <strong class="product-quantity"> × {{ item.quantity }}</strong>
+                                        </td>
+                                        <td class="product-total">
+                                            <span class="amount">{{ item.sub_total }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="order-total">
+                                        <th>Order Total</th>
+                                        <td><strong><span class="amount">Rs {{ total_price }}</span></strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="order-button-payment mt-20">
+                        {% if cart_items %}
+                        <button type="submit" value="Place Order" class="btn theme-btn">Place order</button>
+                        {% else %}
+                        <p class="empty-cart-message">Your cart is empty. Please add items to proceed.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </section>
-        <!-- checkout-area end -->
-        <script>
-            function selectAddress(addressId) {
-              const addressIdInput = document.getElementById('address-id');
-              addressIdInput.value = addressId;
-            }
-            
-            </script>
-        {% endblock %}
+        </form>
+    </div>
+</section>
+<!-- checkout-area end -->
 
-    
+<script>
+    function selectAddress(addressId) {
+        const addressIdInput = document.getElementById('address-id');
+        addressIdInput.value = addressId;
+    }
+</script>
+{% endblock %}

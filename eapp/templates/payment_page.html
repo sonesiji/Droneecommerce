@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #28313b, #485461);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+
+        .payment-card {
+            background: #fff;
+            width: 360px;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            color: #333;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .payment-card h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-card .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .payment-card label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .payment-card input {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            background-color: #f9f9f9;
+            color: #34495e;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .payment-card input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .payment-card .icon {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #bdc3c7;
+        }
+
+        .payment-card .button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .payment-card .button:hover {
+            background: linear-gradient(90deg, #2980b9, #3498db);
+            transform: scale(1.02);
+        }
+
+        .payment-card .expiry-cvv {
+            display: flex;
+            gap: 10px;
+        }
+
+        .payment-card .expiry-cvv input {
+            width: calc(50% - 5px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-card">
+        <h1>Secure Payment</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="card_number">Card Number</label>
+                <input type="text" id="card_number" name="card_number" maxlength="16" required placeholder="1234 5678 9101 1121">
+                <span class="icon">&#128179;</span>
+            </div>
+
+            <div class="expiry-cvv">
+                <div class="input-group">
+                    <label for="expiry_date">Expiry Date</label>
+                    <input type="month" id="expiry_date" name="expiry_date" required>
+                </div>
+                <div class="input-group">
+                    <label for="cvv">CVV</label>
+                    <input type="password" id="cvv" name="cvv" maxlength="3" required placeholder="123">
+                </div>
+            </div>
+
+            <button type="submit" class="button">Pay Now</button>
+        </form>
+    </div>
+</body>
+</html>

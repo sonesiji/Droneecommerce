@@ -1,5 +1,13 @@
 from django.urls import path
 from . import views
+from .views import (
+    generate_text,
+    instructor_details,
+    slot_booking,
+    payment_page,
+    view_bookings,
+    confirm_payment,  # Handle confirmation of payment
+)
 
 urlpatterns = [
     path('',views.index,name='index'),
@@ -34,7 +42,28 @@ urlpatterns = [
     path('seller/purchase_order/<int:purchase_order_id>/', views.purchase_order_details, name='purchase_order_details'),
     path('seller/purchase_order/<int:purchase_order_id>/reject/', views.reject_purchase_order, name='reject_purchase_order'),
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+    # path('generate/', generate_text, name='generate_text'),
+     path('generate_text/', views.generate_text, name='generate_text'),
+
+    path('instructor/', instructor_details, name='instructor_details'),
+    # path('', instructor_details, name='instructor_details'),  # Instructor details page
+    path('book/', slot_booking, name='slot_booking'),  # Slot booking page
+    path('payment/<int:booking_id>/', payment_page, name='payment'),  # Redirects to payment page with booking_id
+    
+  
+    path('confirm-payment/<int:booking_id>/', views.confirm_payment, name='confirm_payment'),
    
+
+    path('view-bookings/', view_bookings, name='view_bookings'),  # View user bookings page
+    
+    path('available-times/', views.available_times, name='available_times'),  # Get available times
+    
+      path('slot-booking/', views.slot_booking, name='slot_booking'),
+    path('get-booked-slots/', views.get_booked_slots, name='get_booked_slots'),
+
+    path('view-bookings/', views.view_bookings, name='view_bookings'),
+
+
 
 
     

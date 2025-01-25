@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Confirmed</title>
+</head>
+<body>
+    <h1>Your Booking is Confirmed!</h1>
+    <p>Details:</p>
+    <ul>
+        <li>Name: {{ booking.name }}</li>
+        <li>Email: {{ booking.email }}</li>
+        <li>Address: {{ booking.address }}</li>
+        <li>Phone Number: {{ booking.phone_number }}</li>
+        <li>Drone Details: {{ booking.drone_details }}</li>
+        <li>Slot: {{ booking.slot.date }} at {{ booking.slot.time }}</li>
+    </ul>
+</body>
+</html>
