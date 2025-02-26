@@ -4,110 +4,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Orders</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+    <title>Enterprise Purchase Order Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Your custom CSS styles here */
         body {
-            background-color: #f8f9fa; /* Set a vibrant background color */
+            background: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        .table tbody tr:hover {
-            background-color: #cce5ff; /* Set the background color on hover */
-            cursor: pointer; /* Change cursor to pointer on hover */
+        .navbar {
+            background: #1a365d !important;
+            padding: 0.75rem 0;
         }
 
-        .user-icon {
-            color: #fff; /* Set the color of the user icon */
-            margin-right: 5px; /* Add some spacing between the icon and username */
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 1.5rem;
         }
 
-        h1 {
-            margin-top: 70px;
+        .nav-link {
+            color: #ffffff !important;
+            padding: 0.75rem 1rem !important;
+            font-weight: 500;
         }
 
-        img {
-            height: 40px;
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-container {
+            padding: 2rem 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            background: #ffffff;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            color: #1a365d;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .data-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            color: #1a365d;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 1rem 1.5rem;
+            color: #1f2937;
+            vertical-align: middle;
+        }
+
+        .table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            font-size: 0.875rem;
+        }
+
+        .status-pending {
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fdba74;
+        }
+
+        .status-progress {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .action-button {
+            color: #1a365d;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background: #f1f5f9;
+            color: #1a365d;
+        }
+
+        .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: #1a365d;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-footer .btn {
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .dashboard-header {
+                padding: 1rem;
+            }
+            
+            .table-responsive {
+                border-radius: 8px;
+            }
         }
     </style>
 </head>
 <body>
     {% if messages %}
-    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="messageModal" tabindex="-1">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Message</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title">System Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     {% for message in messages %}
-                        <p>{{ message }}</p>
+                        <p class="mb-0">{{ message }}</p>
                     {% endfor %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-{% endif %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    {% endif %}
+
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#"><img src="{% static 'img/logo/logo.png' %}" alt=""
-                /></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <a class="navbar-brand" href="#">
+                Enterprise PO System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-user user-icon"></i>{{ username }}</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'seller_purchase_orders_history' %}">History</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user me-2"></i>{{ username }}
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                        <a class="nav-link" href="{% url 'seller_purchase_orders_history' %}">
+                            <i class="fas fa-history me-2"></i>Order History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <h1 class="text-center mb-5">Purchase Orders</h1>
-        <div class="row">
-            <div class="col-md-12">
-                <h3 class="h3 mb-5">Pending Orders</h3>
+    <div class="container main-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Purchase Order Management</h1>
+        </div>
+        
+        <div class="data-card">
+            <div class="card-header">
+                <h2 class="card-title">Pending Orders</h2>
+            </div>
+            <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Order Number</th>
-                            <th>Date</th>
-                            <th>Total Amount</th>
-                            <th>Status</th>
+                            <th>Purchase Order ID</th>
+                            <th>Date Issued</th>
+                            <th>Total Value</th>
+                            <th>Current Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for purchase_order in purchase_orders %}
                         {% if purchase_order.Status != 'Not Initiated' and purchase_order.Status != 'Rejected' and purchase_order.Status != 'Delivered' and purchase_order.Status != 'In Progress' %}
-                        <tr onclick="window.location='{% url 'purchase_order_details' purchase_order.id %}'">
-                            <td>{{ purchase_order.id }}</td>
+                        <tr>
+                            <td>PO-{{ purchase_order.id }}</td>
                             <td>{{ purchase_order.PurchaseOrderDate }}</td>
                             <td>${{ purchase_order.TotalAmount }}</td>
-                            <td><a href="{% url 'purchase_order_details' purchase_order.id %}">{{ purchase_order.Status }}</a></td>
                             <td>
-                                <a href="{% url 'purchase_order_details' purchase_order.id %}">View Details</a>
+                                <span class="status-badge status-pending">{{ purchase_order.Status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'purchase_order_details' purchase_order.id %}" class="action-button">
+                                    <i class="fas fa-file-alt me-2"></i>View Details
+                                </a>
                             </td>
                         </tr>
                         {% endif %}
@@ -116,29 +264,36 @@
                 </table>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <h3 class="h3 mb-5">In progress Orders</h3>
+
+        <div class="data-card">
+            <div class="card-header">
+                <h2 class="card-title">Orders in Progress</h2>
+            </div>
+            <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Order Number</th>
-                            <th>Date</th>
-                            <th>Total Amount</th>
-                            <th>Status</th>
+                            <th>Purchase Order ID</th>
+                            <th>Date Issued</th>
+                            <th>Total Value</th>
+                            <th>Current Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for purchase_order in purchase_orders %}
                         {% if purchase_order.Status != 'Not Initiated' and purchase_order.Status != 'Rejected' and purchase_order.Status != 'Delivered' and purchase_order.Status == 'In Progress' %}
-                        <tr onclick="window.location='{% url 'purchase_order_details' purchase_order.id %}'">
-                            <td>{{ purchase_order.id }}</td>
+                        <tr>
+                            <td>PO-{{ purchase_order.id }}</td>
                             <td>{{ purchase_order.PurchaseOrderDate }}</td>
                             <td>${{ purchase_order.TotalAmount }}</td>
-                            <td><a href="{% url 'purchase_order_details' purchase_order.id %}">{{ purchase_order.Status }}</a></td>
                             <td>
-                                <a href="{% url 'purchase_order_details' purchase_order.id %}">View Details</a>
+                                <span class="status-badge status-progress">{{ purchase_order.Status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'purchase_order_details' purchase_order.id %}" class="action-button">
+                                    <i class="fas fa-file-alt me-2"></i>View Details
+                                </a>
                             </td>
                         </tr>
                         {% endif %}
@@ -148,16 +303,16 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
         $(document).ready(function() {
             {% if messages %}
-                $('#messageModal').modal('show');
+                var messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+                messageModal.show();
             {% endif %}
         });
     </script>
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,63 +1,35 @@
-{% extends 'base.html' %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Welcome, {{ instructor.name }}</h2>
-    <hr>
-    
-    <!-- Bookings Section -->
-    <h3>Upcoming Bookings</h3>
-    <table class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Slot Date</th>
-                <th>Slot Time</th>
-                <th>User Name</th>
-                <th>User Email</th>
-                <th>Drone Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.id }}</td>
-                <td>{{ booking.slot.date }}</td>
-                <td>{{ booking.slot.time }}</td>
-                <td>{{ booking.name }}</td>
-                <td>{{ booking.email }}</td>
-                <td>{{ booking.drone_details }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No bookings available.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h2>Instructor Dashboard</h2>
 
-    <!-- Add Slots Section -->
-    <h3>Add a New Slot</h3>
-    <form method="POST" class="mt-3">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-md-4">
-                <input type="date" name="date" class="form-control" required>
-            </div>
-            <div class="col-md-4">
-                <input type="time" name="time" class="form-control" required>
-            </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-success">Add Slot</button>
-            </div>
-        </div>
-    </form>
+  <h3>User Bookings</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Drone Details</th>
+        <th>Slot</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in user_bookings %}
+        <tr>
+          <td>{{ booking.name }}</td>
+          <td>{{ booking.email }}</td>
+          <td>{{ booking.phone_number }}</td>
+          <td>{{ booking.drone_details }}</td>
+          <td>{{ booking.slot.date }} {{ booking.slot.time }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-    {% if messages %}
-    <div class="mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-</div>
+  <h3>Add a Booking Slot</h3>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Slot</button>
+  </form>
 {% endblock %}

@@ -64,7 +64,8 @@ urlpatterns = [
     path('view-bookings/', views.view_bookings, name='view_bookings'),
 
 
-
+path('instructor/dashboard/', views.instructor_dashboard, name='instructor_dashboard'),
+path('instructor/export-bookings/', views.export_bookings, name='export_bookings'),
 
     
     

@@ -25,6 +25,13 @@ from .forms import AddressForm
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.views import View
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.utils import timezone
+from datetime import datetime
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
 
 def index(request):
@@ -86,6 +93,36 @@ def register(request):
 
 
 
+# def login_view(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
+        
+#         user = authenticate(request, username=email, password=password)
+        
+#         if user is not None:
+#             login(request, user)
+#             messages.success(request, 'You have successfully logged in!')
+            
+#             # Redirect based on user role
+#             try:
+#                 customer = user.customer
+#                 return redirect('index')  # Redirect customer to index page
+#             except Customer.DoesNotExist:
+#                 try:
+#                     seller = user.seller
+#                     return redirect('seller_purchase_orders')  # Redirect seller to seller dashboard
+#                 except Seller.DoesNotExist:
+#                     messages.error(request, 'You are not authorized to access this page.')
+#                     return redirect('login')  # Redirect to login page if no associated role found
+
+#         else:
+#             messages.error(request, 'Invalid email or password. Please try again.')
+#             return render(request, 'customer/login.html')  # Change 'login.html' to your login template path
+#     return render(request, 'customer/login.html')  # Change 'login.html' to your login template path
+
+
+
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -100,19 +137,23 @@ def login_view(request):
             # Redirect based on user role
             try:
                 customer = user.customer
-                return redirect('index')  # Redirect customer to index page
+                return redirect('index')
             except Customer.DoesNotExist:
                 try:
                     seller = user.seller
-                    return redirect('seller_purchase_orders')  # Redirect seller to seller dashboard
+                    return redirect('seller_purchase_orders')
                 except Seller.DoesNotExist:
-                    messages.error(request, 'You are not authorized to access this page.')
-                    return redirect('login')  # Redirect to login page if no associated role found
+                    try:
+                        instructor = user.instructor
+                        return redirect('instructor_dashboard')  # New redirect for instructors
+                    except Instructor.DoesNotExist:
+                        messages.error(request, 'You are not authorized to access this page.')
+                        return redirect('login')
 
         else:
             messages.error(request, 'Invalid email or password. Please try again.')
-            return render(request, 'customer/login.html')  # Change 'login.html' to your login template path
-    return render(request, 'customer/login.html')  # Change 'login.html' to your login template path
+            return render(request, 'customer/login.html')
+    return render(request, 'customer/login.html')
 
 def user_logout(request):
     logout(request)
@@ -981,3 +1022,375 @@ def instructor_dashboard(request):
         'bookings': bookings,
         'slots': slots
     })
+
+
+
+
+
+
+# from django.shortcuts import render, redirect
+# from django.contrib.auth.decorators import login_required
+# from django.contrib import messages
+# from .models import UserBooking, BookingSlot, Instructor
+# from django.utils import timezone
+# from datetime import datetime
+# from django.core.exceptions import ValidationError
+
+# @login_required
+# def instructor_dashboard(request):
+#     bookings = UserBooking.objects.all().order_by('-created_at')
+#     slots = BookingSlot.objects.all().order_by('date', 'time')
+#     instructors = Instructor.objects.all()
+    
+#     if request.method == 'POST':
+#         try:
+#             date_str = request.POST.get('date')
+#             time_str = request.POST.get('time')
+#             instructor_id = request.POST.get('instructor')
+            
+#             # Convert string date to date object
+#             date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            
+#             # Convert string time to time object
+#             time_obj = datetime.strptime(time_str, '%H:%M').time()
+            
+#             # Get instructor
+#             instructor = Instructor.objects.get(id=instructor_id)
+            
+#             # Check if the slot already exists
+#             if BookingSlot.objects.filter(date=date_obj, time=time_obj, instructor=instructor).exists():
+#                 messages.error(request, 'A slot with this date and time already exists for this instructor.')
+#                 return redirect('instructor_dashboard')
+            
+#             # Create new booking slot
+#             slot = BookingSlot(
+#                 instructor=instructor,
+#                 date=date_obj,
+#                 time=time_obj,
+#                 is_booked=False
+#             )
+#             slot.full_clean()  # Validate the model
+#             slot.save()
+            
+#             messages.success(request, 'Slot added successfully!')
+#             return redirect('instructor_dashboard')
+            
+#         except Instructor.DoesNotExist:
+#             messages.error(request, "Please select a valid instructor.")
+#         except ValidationError as e:
+#             messages.error(request, f"Validation error: {str(e)}")
+#         except Exception as e:
+#             print(f"Error creating slot: {str(e)}")  # For debugging
+#             messages.error(request, f"Error creating slot: {str(e)}")
+    
+#     context = {
+#         'bookings': bookings,
+#         'slots': slots,
+#         'instructors': instructors,
+#         'today': timezone.now().date(),
+#     }
+#     return render(request, 'instructor/dashboard.html', context)
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import UserBooking, BookingSlot, Instructor
+from django.utils import timezone
+from datetime import datetime, timedelta
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
+from django.db.models import Count
+from django.core.paginator import Paginator
+
+@login_required
+# def instructor_dashboard(request):
+#     # Get filter parameters
+#     date_filter = request.GET.get('date')
+#     status_filter = request.GET.get('status')
+#     instructor_filter = request.GET.get('instructor_filter')
+#     search_query = request.GET.get('search')
+
+#     # Base querysets
+#     bookings = UserBooking.objects.all().order_by('-created_at')
+#     slots = BookingSlot.objects.all().order_by('date', 'time')
+#     instructors = Instructor.objects.all()
+
+#     # Apply filters
+#     if date_filter:
+#         bookings = bookings.filter(slot__date=date_filter)
+#         slots = slots.filter(date=date_filter)
+    
+#     if status_filter:
+#         slots = slots.filter(is_booked=(status_filter == 'booked'))
+    
+#     if instructor_filter:
+#         slots = slots.filter(instructor_id=instructor_filter)
+    
+#     if search_query:
+#         bookings = bookings.filter(
+#             name__icontains=search_query) | bookings.filter(
+#             email__icontains=search_query) | bookings.filter(
+#             phone_number__icontains=search_query)
+
+#     # Statistics
+#     total_bookings = bookings.count()
+#     available_slots = slots.filter(is_booked=False).count()
+#     today_bookings = bookings.filter(slot__date=timezone.now().date()).count()
+    
+#     # Pagination
+#     page = request.GET.get('page', 1)
+#     bookings_paginator = Paginator(bookings, 10)
+#     bookings_page = bookings_paginator.get_page(page)
+
+#     if request.method == 'POST':
+#         action = request.POST.get('action')
+        
+#         if action == 'add_slot':
+#             try:
+#                 date_str = request.POST.get('date')
+#                 time_str = request.POST.get('time')
+#                 instructor_id = request.POST.get('instructor')
+              
+                
+#                 date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+#                 time_obj = datetime.strptime(time_str, '%H:%M').time()
+#                 instructor = Instructor.objects.get(id=instructor_id)
+                
+#                 slot = BookingSlot(
+#                     instructor=instructor,
+#                     date=date_obj,
+#                     time=time_obj,
+#                     is_booked=False,
+                    
+#                 )
+#                 slot.full_clean()
+#                 slot.save()
+#                 messages.success(request, 'Slot added successfully!')
+                
+#             except Exception as e:
+#                 messages.error(request, f"Error creating slot: {str(e)}")
+        
+#         elif action == 'delete_slot':
+#             slot_id = request.POST.get('slot_id')
+#             try:
+#                 slot = BookingSlot.objects.get(id=slot_id)
+#                 slot.delete()
+#                 messages.success(request, 'Slot deleted successfully!')
+#             except Exception as e:
+#                 messages.error(request, f"Error deleting slot: {str(e)}")
+        
+#         elif action == 'cancel_booking':
+#             booking_id = request.POST.get('booking_id')
+#             try:
+#                 booking = UserBooking.objects.get(id=booking_id)
+#                 booking.slot.is_booked = False
+#                 booking.slot.save()
+#                 booking.delete()
+#                 messages.success(request, 'Booking cancelled successfully!')
+#             except Exception as e:
+#                 messages.error(request, f"Error cancelling booking: {str(e)}")
+        
+#         return redirect('instructor_dashboard')
+
+#     context = {
+#         'bookings': bookings_page,
+#         'slots': slots,
+#         'instructors': instructors,
+#         'today': timezone.now().date(),
+#         'total_bookings': total_bookings,
+#         'available_slots': available_slots,
+#         'today_bookings': today_bookings,
+#         'selected_date': date_filter,
+#         'selected_status': status_filter,
+#         'selected_instructor': instructor_filter,
+#         'search_query': search_query,
+#     }
+#     return render(request, 'instructor/dashboard.html', context)
+
+# views.py
+
+
+def instructor_dashboard(request):
+    # Check if user is an instructor
+    if not hasattr(request.user, 'instructor'):
+        messages.error(request, 'You are not authorized to access this page.')
+        return redirect('login')
+
+    # Get the logged-in instructor
+    instructor = request.user.instructor
+    instructor_filter = request.GET.get('instructor_filter')
+    # Get filter parameters
+    date_filter = request.GET.get('date')
+    status_filter = request.GET.get('status')
+    search_query = request.GET.get('search')
+
+    # Base querysets - filtered for the logged-in instructor only
+    slots = BookingSlot.objects.filter(instructor=instructor).order_by('date', 'time')
+    bookings = UserBooking.objects.filter(slot__instructor=instructor).order_by('-created_at')
+
+    # Apply filters
+    if date_filter:
+        bookings = bookings.filter(slot__date=date_filter)
+        slots = slots.filter(date=date_filter)
+    
+    if status_filter:
+        slots = slots.filter(is_booked=(status_filter == 'booked'))
+    
+    if search_query:
+        bookings = bookings.filter(
+            Q(name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(phone_number__icontains=search_query)
+        )
+
+    if instructor_filter:
+           slots = slots.filter(instructor_id=instructor_filter)
+    
+
+    # Statistics for the logged-in instructor
+    total_bookings = bookings.count()
+    available_slots = slots.filter(is_booked=False).count()
+    today_bookings = bookings.filter(slot__date=timezone.now().date()).count()
+    
+    # Pagination
+    page = request.GET.get('page', 1)
+    bookings_paginator = Paginator(bookings, 10)
+    bookings_page = bookings_paginator.get_page(page)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_slot':
+            try:
+                date_str = request.POST.get('date')
+                time_str = request.POST.get('time')
+                instructor_id = request.POST.get('instructor')
+                
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                time_obj = datetime.strptime(time_str, '%H:%M').time()
+                instructor = Instructor.objects.get(id=instructor_id)
+                
+                slot = BookingSlot(
+                    instructor=instructor,  # Use logged-in instructor
+                    date=date_obj,
+                    time=time_obj,
+                    is_booked=False
+                )
+                slot.full_clean()
+                slot.save()
+                messages.success(request, 'Slot added successfully!')
+                
+            except Exception as e:
+                messages.error(request, f"Error creating slot: {str(e)}")
+        
+        elif action == 'delete_slot':
+            slot_id = request.POST.get('slot_id')
+            try:
+                # Ensure instructor can only delete their own slots
+                slot = BookingSlot.objects.get(id=slot_id, instructor=instructor)
+                slot.delete()
+                messages.success(request, 'Slot deleted successfully!')
+            except BookingSlot.DoesNotExist:
+                messages.error(request, "You can only delete your own slots.")
+            except Exception as e:
+                messages.error(request, f"Error deleting slot: {str(e)}")
+        
+        elif action == 'cancel_booking':
+            booking_id = request.POST.get('booking_id')
+            try:
+                # Ensure instructor can only cancel bookings for their slots
+                booking = UserBooking.objects.get(
+                    id=booking_id,
+                    slot__instructor=instructor
+                )
+                booking.slot.is_booked = False
+                booking.slot.save()
+                booking.delete()
+                messages.success(request, 'Booking cancelled successfully!')
+            except UserBooking.DoesNotExist:
+                messages.error(request, "You can only cancel bookings for your slots.")
+            except Exception as e:
+                messages.error(request, f"Error cancelling booking: {str(e)}")
+        
+        return redirect('instructor_dashboard')
+
+    # Get all instructors
+    # instructors = Instructor.objects.all()
+    instructors = Instructor.objects.filter(id=instructor.id)
+
+    context = {
+        'bookings': bookings_page,
+        'slots': slots,
+        'instructor': instructor,
+        'instructors': instructors,  # Add this line
+        'today': timezone.now().date(),
+        'total_bookings': total_bookings,
+        'available_slots': available_slots,
+        'today_bookings': today_bookings,
+        'selected_date': date_filter,
+        'selected_status': status_filter,
+        'search_query': search_query,
+}
+    return render(request, 'instructor/dashboard.html', context)
+
+
+
+@login_required
+def export_bookings(request):
+    import csv
+    from django.http import HttpResponse
+    from django.utils import timezone
+    
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="bookings.csv"'},
+    )
+    
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Time', 'Student Name', 'Email', 'Phone', 'Drone Details', 'Status', 'Instructor'])
+    
+    bookings = UserBooking.objects.all().order_by('-created_at')
+    for booking in bookings:
+        writer.writerow([
+            booking.slot.date,
+            booking.slot.time,
+            booking.name,
+            booking.email,
+            booking.phone_number,
+            booking.drone_details,
+            'Booked' if booking.slot.is_booked else 'Available',
+            booking.slot.instructor.name
+        ])
+    
+    return response
+
+
+from django.shortcuts import render
+from .models import Instructor
+
+def instructor_details(request):
+    instructors = Instructor.objects.all()
+    return render(request, 'instructor_details.html', {'instructors': instructors})
+
+
+
+
+
+from django.views.generic.edit import CreateView, UpdateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.http import JsonResponse
+
+class InstructorCreateView(CreateView):
+    model = Instructor
+    template_name = 'instructor_form.html'
+    success_url = reverse_lazy('instructor_list')
+    fields = ['name', 'photo', 'rpc_number', 'experience', 'issued_date', 
+              'phone_number', 'email', 'username', 'password']
+
+    def form_invalid(self, form):
+        if self.request.is_ajax():
+            return JsonResponse(form.errors, status=400)
+        return super().form_invalid(form)

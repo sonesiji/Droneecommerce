@@ -45,7 +45,7 @@
                 <td><img src="{{ item.product.image_1.url }}" alt="{{ item.product.name }}"></td>
                 <td>{{ item.product.name }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>${{ item.total_price }}</td>
+                <td>Rs {{ item.total_price }}</td>
             </tr>
             {% endfor %}
         </tbody>

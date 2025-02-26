@@ -1,0 +1,98 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('instructor_form');
+    if (!form) return;
+
+    // Function to show validation errors
+    function showValidationError(message) {
+        Swal.fire({
+            title: 'Validation Error',
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        const rpcInput = document.querySelector('input[name="rpc_number"]');
+        const phoneInput = document.querySelector('input[name="phone_number"]');
+        const passwordInput = document.querySelector('input[name="password"]');
+
+        // RPC number validation
+        if (rpcInput && !rpcInput.value.match(/^RPC-\d{6}$/)) {
+            e.preventDefault();
+            showValidationError('RPC number must be in the format RPC-XXXXXX where X is a digit.');
+            rpcInput.focus();
+            return;
+        }
+
+        // Phone number validation
+        if (phoneInput && !phoneInput.value.match(/^\+?1?\d{9,15}$/)) {
+            e.preventDefault();
+            showValidationError('Phone number must be entered in the format: "+999999999". Up to 15 digits allowed.');
+            phoneInput.focus();
+            return;
+        }
+
+        // Password validation (if present and has value)
+        if (passwordInput && passwordInput.value) {
+            if (passwordInput.value.length < 8) {
+                e.preventDefault();
+                showValidationError('Password must be at least 8 characters long.');
+                passwordInput.focus();
+                return;
+            }
+            if (!/\d/.test(passwordInput.value)) {
+                e.preventDefault();
+                showValidationError('Password must contain at least one digit.');
+                passwordInput.focus();
+                return;
+            }
+            if (!/[A-Z]/.test(passwordInput.value)) {
+                e.preventDefault();
+                showValidationError('Password must contain at least one uppercase letter.');
+                passwordInput.focus();
+                return;
+            }
+        }
+    });
+
+    // Add helpful placeholders and patterns
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.name === 'rpc_number') {
+            input.placeholder = 'RPC-123456';
+            input.pattern = '^RPC-\\d{6}$';
+        }
+        if (input.name === 'phone_number') {
+            input.placeholder = '+919999999999';
+            input.pattern = '\\+?1?\\d{9,15}';
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+    {% if errors %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: "{{ errors|join:', ' }}",
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

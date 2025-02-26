@@ -109,7 +109,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <!-- <a class="navbar-brand" href="#"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" /></a> -->
+            <a class="navbar-brand" href="#"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" /></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -135,6 +135,64 @@
         <h1 class="text-center">Purchase Orders</h1>
         <div class="row">
             <div class="col-md-12">
+                <h3>Pending Orders</h3>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purchase_order in purchase_orders %}
+                        {% if purchase_order.Status != 'Not Initiated' and purchase_order.Status != 'Rejected' and purchase_order.Status != 'Delivered' and purchase_order.Status != 'In Progress' %}
+                        <tr onclick="window.location='{% url 'purchase_order_details' purchase_order.id %}'">
+                            <td>PO-{{ purchase_order.id }}</td>
+                            <td>{{ purchase_order.PurchaseOrderDate }}</td>
+                            <td>${{ purchase_order.TotalAmount }}</td>
+                            <td><a class="action-link" href="{% url 'purchase_order_details' purchase_order.id %}">{{ purchase_order.Status }}</a></td>
+                            <td>
+                                <a class="btn btn-view" href="{% url 'purchase_order_details' purchase_order.id %}">View Details</a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-12">
+                <h3>Orders in Progress</h3>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purchase_order in purchase_orders %}
+                        {% if purchase_order.Status == 'In Progress' %}
+                        <tr onclick="window.location='{% url 'purchase_order_details' purchase_order.id %}'">
+                            <td>PO-{{ purchase_order.id }}</td>
+                            <td>{{ purchase_order.PurchaseOrderDate }}</td>
+                            <td>${{ purchase_order.TotalAmount }}</td>
+                            <td><a class="action-link" href="{% url 'purchase_order_details' purchase_order.id %}">{{ purchase_order.Status }}</a></td>
+                            <td>
+                                <a class="btn btn-view" href="{% url 'purchase_order_details' purchase_order.id %}">View Details</a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-12">
                 <h3>Delivered Orders</h3>
                 <table class="table table-striped table-hover">
                     <thead>
@@ -152,7 +210,7 @@
                         <tr onclick="window.location='{% url 'purchase_order_details' purchase_order.id %}'">
                             <td>{{ purchase_order.id }}</td>
                             <td>{{ purchase_order.PurchaseOrderDate }}</td>
-                            <td>Rs {{ purchase_order.TotalAmount }}</td>
+                            <td>${{ purchase_order.TotalAmount }}</td>
                             <td><a class="action-link" href="{% url 'purchase_order_details' purchase_order.id %}">{{ purchase_order.Status }}</a></td>
                             <td>
                                 <a class="btn btn-view" href="{% url 'purchase_order_details' purchase_order.id %}">View Details</a>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Booking Slot</h2>
+{% if error %}
+<p style="color: red;">{{ error }}</p>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <label for="date">Date:</label>
+    <input type="date" name="date" required>
+    <label for="time">Time:</label>
+    <input type="time" name="time" required>
+    <button type="submit">Add Slot</button>
+</form>
+{% endblock %}

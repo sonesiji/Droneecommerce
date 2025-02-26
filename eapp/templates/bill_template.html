@@ -39,15 +39,15 @@
             <tr>
                 <td>{{ item.product.name }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>${{ item.product.price }}</td>
-                <td>${{ item.total_price }}</td>
+                <td>Rs {{ item.product.price }}</td>
+                <td>Rs{{ item.total_price }}</td>
             </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr>
                 <td colspan="3">Total</td>
-                <td>${{ order.total_price }}</td>
+                <td>Rs{{ order.total_price }}</td>
             </tr>
         </tfoot>
     </table>

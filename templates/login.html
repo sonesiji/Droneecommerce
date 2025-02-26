@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .login-wrapper {
+        min-height: 100vh;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .login-card {
+        background: white;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+    }
+
+    .login-header {
+        margin-bottom: 32px;
+        text-align: center;
+    }
+
+    .login-header h1 {
+        color: #111827;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .login-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .login-form label {
+        display: block;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .login-form input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #111827;
+        transition: border-color 0.15s ease;
+    }
+
+    .login-form input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 1px #4f46e5;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        margin: 16px 0;
+    }
+
+    .remember-me input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+    }
+
+    .remember-me label {
+        margin: 0;
+        font-size: 14px;
+        color: #4b5563;
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 12px;
+        background: #4f46e5;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .login-btn:hover {
+        background: #4338ca;
+    }
+
+    .divider {
+        margin: 24px 0;
+        border-top: 1px solid #e5e7eb;
+        position: relative;
+        text-align: center;
+    }
+
+    .divider span {
+        position: relative;
+        top: -12px;
+        background: white;
+        padding: 0 12px;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .register-btn {
+        width: 100%;
+        padding: 12px;
+        background: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .register-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+    .forgot-link {
+        display: block;
+        text-align: center;
+        margin-top: 16px;
+        color: #4f46e5;
+        font-size: 14px;
+        text-decoration: none;
+    }
+
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Sign in</h1>
+        </div>
+        
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
+            
+            <button type="submit" class="login-btn">Sign in</button>
+            
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <a href="{% url 'register' %}" class="register-btn">Create account</a>
+            <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

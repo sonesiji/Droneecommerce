@@ -1,3 +1,7 @@
+product-details.html
+
+
+
 {% extends 'base.html' %} {% block content %} {% load static %}
 
 <style>
@@ -95,7 +99,7 @@
                             </div>
                             <h2 class="pro-details-title mb-15">{{ product.name }}</h2>
                             <div class="details-price mb-20">
-                                <span>${{ product.price }}</span>
+                                <span>Rs {{ product.price }}</span>
                             </div>
                             <div class="product-variant">
 
@@ -174,8 +178,8 @@
                         <div class="product-review">
                             <ul class="nav review-tab" id="myTabproduct" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="home-tab6" data-toggle="tab" href="#home6" role="tab" aria-controls="home"
-                                        aria-selected="true">Description </a>
+                                    <!-- <a class="nav-link active" id="home-tab6" data-toggle="tab" href="#home6" role="tab" aria-controls="home"
+                                        aria-selected="true">Description </a> -->
                                 </li>
                                 <!-- <li class="nav-item">
                                     <a class="nav-link" id="profile-tab6" data-toggle="tab" href="#profile6" role="tab" aria-controls="profile"
@@ -183,14 +187,14 @@
                                 </li> -->
                             </ul>
                             <div class="tab-content" id="myTabContent2">
-                                <div class="tab-pane fade show active" id="home6" role="tabpanel" aria-labelledby="home-tab6">
+                                <!-- <div class="tab-pane fade show active" id="home6" role="tabpanel" aria-labelledby="home-tab6">
                                     <div class="desc-text">
                                         <p>{{ product.decription|safe }}</p>
                                         <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui
                                         ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,
                                         adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>

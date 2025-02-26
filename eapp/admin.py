@@ -178,9 +178,33 @@ class POMessageAdmin(admin.ModelAdmin):
         return qs.filter(confirmed=False)
 
 
-from .models import Instructor, BookingSlot, UserBooking
+from django.contrib import admin
+from django.contrib import messages
+from .models import *
 
-# Register your models here.
-admin.site.register(Instructor)
+class InstructorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'rpc_number', 'phone_number', 'email')
+    search_fields = ('name', 'rpc_number', 'phone_number', 'email')
+    
+    def add_view(self, request, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        if request.method == 'POST':
+            try:
+                return super().add_view(request, form_url, extra_context)
+            except ValidationError as e:
+                messages.error(request, str(e))
+        return super().add_view(request, form_url, extra_context)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        if request.method == 'POST':
+            try:
+                return super().change_view(request, object_id, form_url, extra_context)
+            except ValidationError as e:
+                messages.error(request, str(e))
+        return super().change_view(request, object_id, form_url, extra_context)
+
+admin.site.register(Instructor, InstructorAdmin)
+
 admin.site.register(BookingSlot)
 admin.site.register(UserBooking)
