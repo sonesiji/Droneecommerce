@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Instructor Booking Statistics</h5>
+                <canvas id="instructorChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Booking Distribution</h5>
+                <canvas id="dailyBookingChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Instructor Chart
+new Chart(document.getElementById('instructorChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ booking_stats|safe }}.map(item => item.instructor__name),
+        datasets: [{
+            label: 'Booked Slots',
+            data: {{ booking_stats|safe }}.map(item => item.booked_slots),
+            backgroundColor: '#36a2eb'
+        }, {
+            label: 'Available Slots',
+            data: {{ booking_stats|safe }}.map(item => item.available_slots),
+            backgroundColor: '#ff6384'
+        }]
+    },
+    options: {
+        scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+        }
+    }
+});
+
+// Daily Booking Chart
+new Chart(document.getElementById('dailyBookingChart'), {
+    type: 'line',
+    data: {
+        labels: {{ daily_bookings|safe }}.map(item => item.date),
+        datasets: [{
+            label: 'Total Slots',
+            data: {{ daily_bookings|safe }}.map(item => item.total),
+            borderColor: '#36a2eb',
+            fill: false
+        }, {
+            label: 'Booked Slots',
+            data: {{ daily_bookings|safe }}.map(item => item.booked),
+            borderColor: '#ff6384',
+            fill: false
+        }]
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Product Overview</h5>
+                <canvas id="productChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Order Status</h5>
+                <canvas id="orderChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Product Chart
+new Chart(document.getElementById('productChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Total Products', 'Low Stock'],
+        datasets: [{
+            label: 'Product Statistics',
+            data: [{{ total_products }}, {{ low_stock_products }}],
+            backgroundColor: ['#36a2eb', '#ff6384']
+        }]
+    }
+});
+
+// Order Status Chart
+new Chart(document.getElementById('orderChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ order_status_data|safe }}.map(item => item.status),
+        datasets: [{
+            data: {{ order_status_data|safe }}.map(item => item.count),
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+        }]
+    }
+});
+</script>
+{% endblock %}

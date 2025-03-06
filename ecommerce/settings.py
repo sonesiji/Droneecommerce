@@ -144,7 +144,8 @@ EMAIL_HOST_USER = 'sonesiji2020@gmail.com'
 EMAIL_HOST_PASSWORD = 'mwwylubblnewwpcs'
 
 LOGIN_URL = 'login'
-
+# Add your site URL
+SITE_URL = 'https://yourdomain.com'  # Replace with your actual domain
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)

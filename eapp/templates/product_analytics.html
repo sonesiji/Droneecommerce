@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Inventory Levels</h5>
+                <canvas id="inventoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Category Distribution</h5>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Inventory Chart
+new Chart(document.getElementById('inventoryChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ products|safe }}.map(item => item.name),
+        datasets: [{
+            label: 'Current Stock',
+            data: {{ products|safe }}.map(item => item.quantity_in_stock),
+            backgroundColor: '#36a2eb'
+        }, {
+            label: 'Reorder Level',
+            data: {{ products|safe }}.map(item => item.reorder_level),
+            backgroundColor: '#ff6384'
+        }]
+    }
+});
+
+// Category Chart
+new Chart(document.getElementById('categoryChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ category_distribution|safe }}.map(item => item.category_name),
+        datasets: [{
+            data: {{ category_distribution|safe }}.map(item => item.count),
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+        }]
+    }
+});
+</script>
+{% endblock %}

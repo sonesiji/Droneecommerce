@@ -8,6 +8,19 @@ from django.core.validators import MinLengthValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from jsonschema import ValidationError
+from datetime import datetime, timedelta
+
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.core.validators import RegexValidator, MinLengthValidator
+from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.core.exceptions import ValidationError  # Changed from jsonschema import
+import random
+import string
+from datetime import date, datetime, time
+import re
 
 class Address(models.Model):
     recepient_name = models.CharField(max_length=100, null=True)
@@ -260,7 +273,11 @@ def validate_future_date(value):
         raise ValidationError('Date cannot be in the past.')
 
 def validate_business_hours(value):
-    if not (time(9, 0) <= value.time() <= time(17, 0)):
+    # Create time objects for comparison
+    opening_time = time(9, 0)
+    closing_time = time(17, 0)
+    # Compare the time values directly
+    if not (opening_time <= value <= closing_time):
         raise ValidationError('Booking time must be between 9:00 AM and 5:00 PM.')
 
 class Instructor(models.Model):
@@ -273,7 +290,7 @@ class Instructor(models.Model):
     phone_number = models.CharField(max_length=15, validators=[validate_phone_number])
     email = models.EmailField(unique=True, null=True, blank=True)
     username = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    password = models.CharField(max_length=100, null=True, blank=True, validators=[validate_password_complexity])
+    # password = models.CharField(max_length=100, null=True, blank=True, validators=[validate_password_complexity])
 
     class Meta:
         verbose_name = 'Instructor'
@@ -365,6 +382,7 @@ class BookingSlot(models.Model):
         booking_datetime = datetime.combine(self.date, self.time)
         if booking_datetime < datetime.now() + timedelta(hours=24):
             raise ValidationError('Booking must be made at least 24 hours in advance.')
+        
 
     def save(self, *args, **kwargs):
         self.full_clean()

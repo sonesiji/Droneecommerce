@@ -32,8 +32,17 @@ from datetime import datetime
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import redirect, render
-
-
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils import timezone
+from django.db.models import Q
+from django.utils import timezone
+from django.db.models import Q
+from datetime import datetime, timedelta
+from django.core.paginator import Paginator
+from django.shortcuts import render, redirect
+from django.contrib import messages
 def index(request):
     products = Product.objects.all()
     return render(request, 'index.html', {'products': products})
@@ -1212,7 +1221,11 @@ from django.core.paginator import Paginator
 # views.py
 
 
+
+
+
 def instructor_dashboard(request):
+    delete_expired_slots()
     # Check if user is an instructor
     if not hasattr(request.user, 'instructor'):
         messages.error(request, 'You are not authorized to access this page.')
@@ -1225,7 +1238,9 @@ def instructor_dashboard(request):
     date_filter = request.GET.get('date')
     status_filter = request.GET.get('status')
     search_query = request.GET.get('search')
-
+    # Get current date and time for filtering
+    current_date = timezone.now().date()
+    current_time = timezone.now().time()
     # Base querysets - filtered for the logged-in instructor only
     slots = BookingSlot.objects.filter(instructor=instructor).order_by('date', 'time')
     bookings = UserBooking.objects.filter(slot__instructor=instructor).order_by('-created_at')
@@ -1297,18 +1312,145 @@ def instructor_dashboard(request):
             except Exception as e:
                 messages.error(request, f"Error deleting slot: {str(e)}")
         
+        # In your views.py file
+
+
         elif action == 'cancel_booking':
             booking_id = request.POST.get('booking_id')
             try:
-                # Ensure instructor can only cancel bookings for their slots
                 booking = UserBooking.objects.get(
                     id=booking_id,
                     slot__instructor=instructor
                 )
+                
+                # Store booking details
+                student_email = booking.email
+                booking_date = booking.slot.date.strftime('%B %d, %Y')  # Format: March 6, 2025
+                booking_time = booking.slot.time.strftime('%I:%M %p')   # Format: 09:30 AM
+                student_name = booking.name
+                
+                # Cancel the booking
                 booking.slot.is_booked = False
                 booking.slot.save()
                 booking.delete()
-                messages.success(request, 'Booking cancelled successfully!')
+                
+                # HTML Email Template
+                html_message = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Booking Cancellation</title>
+                    <style>
+                        body {{
+                            font-family: 'Arial', sans-serif;
+                            line-height: 1.6;
+                            color: #333333;
+                            margin: 0;
+                            padding: 0;
+                        }}
+                        .email-container {{
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }}
+                        .header {{
+                            background-color: #f8f9fa;
+                            padding: 20px;
+                            text-align: center;
+                            border-radius: 5px 5px 0 0;
+                        }}
+                        .content {{
+                            background-color: #ffffff;
+                            padding: 30px;
+                            border-radius: 0 0 5px 5px;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }}
+                        .booking-details {{
+                            background-color: #f8f9fa;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 5px;
+                        }}
+                        .important-note {{
+                            background-color: #fff3cd;
+                            color: #856404;
+                            padding: 15px;
+                            margin: 20px 0;
+                            border-radius: 5px;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            margin-top: 20px;
+                            padding-top: 20px;
+                            border-top: 1px solid #eeeeee;
+                            color: #666666;
+                        }}
+                        .btn {{
+                            display: inline-block;
+                            padding: 10px 20px;
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            margin-top: 15px;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="header">
+                            <h2 style="color: #dc3545; margin: 0;">Booking Cancellation Notice</h2>
+                        </div>
+                        
+                        <div class="content">
+                            <p>Dear {student_name},</p>
+                            
+                            <p>We regret to inform you that your booking has been cancelled due to unavoidable circumstances.</p>
+                            
+                            <div class="booking-details">
+                                <h3 style="margin-top: 0;">Booking Details:</h3>
+                                <p><strong>Date:</strong> {booking_date}</p>
+                                <p><strong>Time:</strong> {booking_time}</p>
+                            </div>
+                            
+                            <div class="important-note">
+                                <p><strong>Important:</strong> Your payment will be automatically refunded within 3 business days.</p>
+                            </div>
+                            
+                            <p>We understand this may cause inconvenience and we sincerely apologize. You can book another available slot using the button below.</p>
+                            
+                            <div style="text-align: center;">
+                                <a href="{settings.SITE_URL}/booking" class="btn">Book New Slot</a>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>If you have any questions or concerns, please don't hesitate to contact our support team.</p>
+                                <p style="margin-bottom: 0;">Best regards,<br>The Booking Team</p>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                
+                # Plain text version of the email for clients that don't support HTML
+                plain_message = strip_tags(html_message)
+                
+                try:
+                    send_mail(
+                        subject='Your Booking Has Been Cancelled',
+                        message=plain_message,
+                        html_message=html_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[student_email],
+                        fail_silently=False,
+                    )
+                except Exception as email_error:
+                    messages.warning(request, f'Booking cancelled but failed to send email notification: {str(email_error)}')
+                else:
+                    messages.success(request, 'Booking cancelled successfully and notification email sent!')
             except UserBooking.DoesNotExist:
                 messages.error(request, "You can only cancel bookings for your slots.")
             except Exception as e:
@@ -1394,3 +1536,99 @@ class InstructorCreateView(CreateView):
         if self.request.is_ajax():
             return JsonResponse(form.errors, status=400)
         return super().form_invalid(form)
+    
+
+
+def delete_expired_slots():
+    """Delete all booking slots that have passed their date"""
+    current_date = timezone.now().date()
+    current_time = timezone.now().time()
+    
+    # Delete slots from past dates
+    BookingSlot.objects.filter(date__lt=current_date).delete()
+    
+    # Delete slots from current date but with passed time
+    BookingSlot.objects.filter(
+        date=current_date,
+        time__lt=current_time
+    ).delete()
+
+
+
+
+
+# def get_booked_slots(request):
+#     date = request.GET.get('date')
+#     instructor_id = request.GET.get('instructor_id')
+    
+#     if not date or not instructor_id:
+#         return JsonResponse({'error': 'Date and instructor ID are required'}, status=400)
+    
+#     try:
+#         date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        
+#         # Filter slots by both date and instructor
+#         slots = BookingSlot.objects.filter(
+#             date=date_obj,
+#             instructor_id=instructor_id
+#         ).order_by('time')
+        
+#         slots_data = []
+#         for slot in slots:
+#             slots_data.append({
+#                 'time': slot.time.strftime('%H:%M'),
+#                 'is_booked': slot.is_booked,
+#                 'instructor_id': slot.instructor_id,
+#                 'instructor_name': slot.instructor.name
+#             })
+        
+#         return JsonResponse({'slots': slots_data})
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=400)
+
+
+def get_booked_slots(request):
+    date = request.GET.get('date')
+    instructor_id = request.GET.get('instructor_id')
+    
+    if not date or not instructor_id:
+        return JsonResponse({'error': 'Date and instructor ID are required'}, status=400)
+    
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        
+        # Filter slots by both date and instructor
+        slots = BookingSlot.objects.filter(
+            date=date_obj,
+            instructor_id=instructor_id  # This ensures we only get slots for the selected instructor
+        ).order_by('time')
+        
+        slots_data = []
+        for slot in slots:
+            slots_data.append({
+                'time': slot.time.strftime('%H:%M'),
+                'is_booked': slot.is_booked,
+                'instructor_id': slot.instructor_id,
+                'instructor_name': slot.instructor.name
+            })
+        
+        return JsonResponse({'slots': slots_data})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+def booking_view(request):
+    # Get the instructor_id from URL parameter
+    selected_instructor_id = request.GET.get('instructor')
+    
+    if selected_instructor_id:
+        # Only get the selected instructor
+        instructors = Instructor.objects.filter(id=selected_instructor_id)
+    else:
+        instructors = Instructor.objects.none()
+    
+    context = {
+        'instructors': instructors,
+        'selected_instructor_id': selected_instructor_id
+    }
+    return render(request, 'slot_booking.html', context)
+

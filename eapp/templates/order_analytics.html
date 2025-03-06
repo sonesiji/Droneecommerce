@@ -1,0 +1,45 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Order Status Distribution</h5>
+                <canvas id="orderStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Daily Orders</h5>
+                <canvas id="dailyOrdersChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// Order Status Chart
+new Chart(document.getElementById('orderStatusChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ order_status|safe }}.map(item => item.status),
+        datasets: [{
+            data: {{ order_status|safe }}.map(item => item.count),
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+        }]
+    }
+});
+
+// Daily Orders Chart
+new Chart(document.getElementById('dailyOrdersChart'), {
+    type: 'line',
+    data: {
+        labels: {{ daily_orders|safe }}.map(item => item.date),
+        datasets: [{
+            label: 'Orders',
+            data: {{ daily_orders|safe }}.map(item => item.count),
+            borderColor: '#36a2eb',
+            fill: false
+        }]
+    }
+});
+</script>
