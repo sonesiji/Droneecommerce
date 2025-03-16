@@ -146,6 +146,22 @@
             padding: 1rem 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+        body.light {
+    --bg-gradient: linear-gradient(to bottom, #ffffff, #f7f7f7);
+    --accent-gradient: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    --message-user: #e2e8f0;
+    --message-bot: #cbd5e0;
+    --text-primary: #000000;
+    --text-secondary: #4a5568;
+}
+
+body.light .chat-messages {
+    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+body.light .chat-messages::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+}
 
         .input-wrapper {
             display: flex;
@@ -431,6 +447,25 @@
             const textarea = document.getElementById('userInput');
             adjustTextareaHeight(textarea);
         };
+        const themeToggle = document.querySelector('.theme-toggle');
+    const body = document.body;
+
+    // Check for saved theme in localStorage
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.classList.toggle('light', savedTheme === 'light');
+        }
+    }
+
+    // Toggle theme and save preference
+    function toggleTheme() {
+        const isLight = body.classList.toggle('light');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+    loadTheme();
     </script>
 </body>
 </html>

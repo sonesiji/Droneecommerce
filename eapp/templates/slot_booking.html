@@ -308,8 +308,8 @@
                     <div class="mb-4">
                         <label class="form-label" for="drone_details">Drone Details</label>
                         <textarea class="form-control" id="drone_details" name="drone_details" rows="4" 
-                                placeholder="Please provide detailed information about your drone including make, model, and specific requirements" required></textarea>
-                        <div class="invalid-feedback">Please provide drone details</div>
+                            placeholder="Please provide detailed information about your drone including make, model, and specific requirements" required></textarea>
+                        <div class="invalid-feedback">Please provide at least 50 characters</div>
                     </div>
                 </div>
 
@@ -488,6 +488,24 @@
 
             form.classList.add('was-validated');
         });
+        document.addEventListener("DOMContentLoaded", function () {
+    const droneDetails = document.getElementById("drone_details");
+
+    droneDetails.addEventListener("input", function () {
+        if (droneDetails.value.length < 50) {
+            droneDetails.classList.add("is-invalid");
+        } else {
+            droneDetails.classList.remove("is-invalid");
+        }
+    });
+
+    document.querySelector("form").addEventListener("submit", function (event) {
+        if (droneDetails.value.length < 50) {
+            event.preventDefault();
+            droneDetails.classList.add("is-invalid");
+        }
+    });
+});
     </script>
 </body>
 </html>

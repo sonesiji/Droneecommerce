@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from .views import query_tool
+from .views import query_tool_page, query_tool
+from .views import order_dashboard
 from .views import (
     generate_text,
     instructor_details,
@@ -66,6 +69,13 @@ urlpatterns = [
 
 path('instructor/dashboard/', views.instructor_dashboard, name='instructor_dashboard'),
 path('instructor/export-bookings/', views.export_bookings, name='export_bookings'),
+path('query/', query_tool_page, name='query_tool_page'),
+    # JSON endpoint to handle queries for specific models.
+    path('query/<str:model_name>/', query_tool, name='query_tool'),
+     path('dashboard/', order_dashboard, name='order_dashboard'),
+      path('api/chatbot/', views.chatbot_message, name='chatbot_message'),
+
+     path('chat/', views.chat_view, name='chat_view'), 
 
 
 

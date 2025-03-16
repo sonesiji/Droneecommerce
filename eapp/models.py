@@ -380,7 +380,7 @@ class BookingSlot(models.Model):
         super().clean()
         # Check if slot is at least 24 hours in advance
         booking_datetime = datetime.combine(self.date, self.time)
-        if booking_datetime < datetime.now() + timedelta(hours=24):
+        if booking_datetime < datetime.now() + timedelta(hours=1):
             raise ValidationError('Booking must be made at least 24 hours in advance.')
         
 
@@ -431,3 +431,4 @@ class UserBooking(models.Model):
         super().save(*args, **kwargs)
         self.slot.is_booked = True
         self.slot.save()
+    

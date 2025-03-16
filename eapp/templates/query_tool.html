@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Query Tool</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --danger-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background-color: var(--card-background);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .filter-row {
+            background-color: var(--background-color);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .filter-row:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-light {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-light:hover {
+            background-color: var(--border-color);
+        }
+
+        .remove-filter {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #fee2e2;
+            color: var(--danger-color);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-filter:hover {
+            background-color: #fecaca;
+            transform: scale(1.05);
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table thead th {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--background-color);
+        }
+
+        .alert {
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            border: none;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-background);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Dark mode styles */
+        .dark-mode {
+            --background-color: #1a1a1a;
+            --card-background: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --border-color: #404040;
+        }
+
+        .dark-mode .table thead th {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .dark-mode .table tbody tr:hover {
+            background-color: #363636;
+        }
+
+        .dark-mode .btn-light {
+            background-color: #363636;
+            border-color: #404040;
+            color: #ffffff;
+        }
+
+        .dark-mode .btn-light:hover {
+            background-color: #404040;
+        }
+
+        .dark-mode .filter-row {
+            background-color: #2d2d2d;
+        }
+
+        .dark-mode .filter-row:hover {
+            background-color: #363636;
+        }
+
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background-color: #2d2d2d;
+            border-color: #404040;
+            color: #ffffff;
+        }
+
+        .dark-mode .form-control:focus,
+        .dark-mode .form-select:focus {
+            background-color: #2d2d2d;
+            border-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-container {
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: var(--card-background);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Stats Section -->
+        <div class="stats-container animate__animated animate__fadeIn">
+            <div class="stat-card">
+                <div class="stat-value" id="totalQueries">0</div>
+                <div class="stat-label">Total Queries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgResponseTime">0ms</div>
+                <div class="stat-label">Avg. Response Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalResults">0</div>
+                <div class="stat-label">Total Results</div>
+            </div>
+        </div>
+
+        <!-- Query Form Card -->
+        <div class="card animate__animated animate__fadeInUp">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="card-title">
+                    <i class="bi bi-search me-2"></i>Advanced Query Tool
+                </h2>
+                <button class="btn btn-light" onclick="toggleDarkMode()">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <form id="queryForm">
+                    <div class="mb-4">
+                        <label for="modelSelect" class="form-label">Select Model</label>
+                        <select id="modelSelect" name="model" class="form-select">
+                            <option value="address">Address</option>
+                            <option value="customer">Customer</option>
+                            <option value="seller">Seller</option>
+                            <option value="category">Category</option>
+                            <option value="subcategory">Subcategory</option>
+                            <option value="product">Product</option>
+                            <option value="cart">Cart</option>
+                            <option value="order">Order</option>
+                            <option value="orderitem">OrderItem</option>
+                            <option value="purchaseorder">PurchaseOrder</option>
+                            <option value="purchaseorderitem">PurchaseOrderItem</option>
+                            <option value="pomessage">POMessage</option>
+                            <option value="instructor">Instructor</option>
+                            <option value="bookingslot">BookingSlot</option>
+                            <option value="userbooking">UserBooking</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Query Filters</h5>
+                            <button type="button" class="btn btn-light" onclick="addFilter()">
+                                <i class="bi bi-plus-lg me-2"></i>Add Filter
+                            </button>
+                        </div>
+                        <div id="filters">
+                            <div class="filter-row animate__animated animate__fadeIn">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col">
+                                        <input type="text" name="key" class="form-control" placeholder="Field Name">
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="value" class="form-control" placeholder="Value">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="remove-filter" onclick="removeFilter(this)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>Execute Query
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div class="card mt-4 animate__animated animate__fadeInUp">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Query Results</h5>
+                <div class="btn-group">
+                    <button class="btn btn-light" onclick="exportToCsv()">
+                        <i class="bi bi-download me-2"></i>Export CSV
+                    </button>
+                    <button class="btn btn-light ms-2" onclick="copyToClipboard()">
+                        <i class="bi bi-clipboard me-2"></i>Copy
+                    </button>
+                </div>
+            </div>
+            <div class="card-body position-relative">
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#modelSelect').select2({
+                theme: 'bootstrap-5'
+            });
+
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.documentElement.classList.add('dark-mode');
+            }
+        });
+
+        // Stats tracking
+        let stats = {
+            totalQueries: 0,
+            totalTime: 0,
+            totalResults: 0
+        };
+
+        function updateStats(queryTime, resultCount) {
+            stats.totalQueries++;
+            stats.totalTime += queryTime;
+            stats.totalResults += resultCount;
+
+            document.getElementById('totalQueries').textContent = stats.totalQueries;
+            document.getElementById('avgResponseTime').textContent = 
+                Math.round(stats.totalTime / stats.totalQueries) + 'ms';
+            document.getElementById('totalResults').textContent = stats.totalResults;
+        }
+
+        function toggleDarkMode() {
+            const root = document.documentElement;
+            const isDarkMode = root.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+        }
+
+        function addFilter() {
+            const filterRow = document.createElement('div');
+            filterRow.className = 'filter-row animate__animated animate__fadeIn';
+            filterRow.innerHTML = `
+                <div class="row g-3 align-items-center">
+                    <div class="col">
+                        <input type="text" name="key" class="form-control" placeholder="Field Name">
+                    </div>
+                    <div class="col">
+                        <input type="text" name="value" class="form-control" placeholder="Value">
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="remove-filter" onclick="removeFilter(this)">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('filters').appendChild(filterRow);
+        }
+
+        function removeFilter(el) {
+            const row = el.closest('.filter-row');
+            row.classList.add('animate__fadeOut');
+            setTimeout(() => row.remove(), 500);
+        }
+
+        function showLoading() {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay animate__animated animate__fadeIn';
+            overlay.innerHTML = '<div class="spinner"></div>';
+            document.querySelector('#results').parentElement.appendChild(overlay);
+        }
+
+        function hideLoading() {
+            const overlay = document.querySelector('.loading-overlay');
+            if (overlay) {
+                overlay.classList.add('animate__fadeOut');
+                setTimeout(() => overlay.remove(), 500);
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `notification animate__animated animate__fadeIn alert-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'warning' ? 'exclamation-triangle' :
+                        type === 'error' ? 'exclamation-circle' : 'info-circle';
+            
+            alert.innerHTML = `<i class="bi bi-${icon}"></i>${message}`;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.add('animate__fadeOut');
+                setTimeout(() => alert.remove(), 500);
+            }, 3000);
+        }
+
+        function buildTable(data) {
+            if (!data.length) {
+                return '<div class="alert alert-info" role="alert">' +
+                    '<i class="bi bi-info-circle me-2"></i>No results found.</div>';
+            }
+            
+            const keys = Object.keys(data[0]);
+            let table = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                ${keys.map(key => `<th>${key}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.forEach(item => {
+                table += '<tr>';
+                keys.forEach(key => {
+                    table += `<td>${item[key] !== null ? item[key] : ''}</td>`;
+                });
+                table += '</tr>';
+            });
+            
+            table += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            return table;
+        }
+
+        async function copyToClipboard() {
+            const table = document.querySelector('.table');
+            if (!table) {
+                showNotification('No data to copy!', 'warning');
+                return;
+            }
+
+            try {
+                // Create a formatted string representation of the table
+                let text = '';
+                
+                // Add headers
+                const headers = Array.from(table.querySelectorAll('thead th'))
+                    .map(th => th.textContent.trim());
+                text += headers.join('\t') + '\n';
+
+                // Add data rows
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const row = Array.from(tr.querySelectorAll('td'))
+                        .map(td => td.textContent.trim());
+                    text += row.join('\t') + '\n';
+                });
+
+                // Use the modern Clipboard API
+                await navigator.clipboard.writeText(text);
+                showNotification('Table copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback to older execCommand method
+                try {
+                    const range = document.createRange();
+                    range.selectNode(table);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                    window.getSelection().removeAllRanges();
+                    showNotification('Table copied to clipboard!', 'success');
+                } catch (fallbackErr) {
+                    showNotification('Failed to copy table to clipboard', 'error');
+                    console.error('Clipboard Copy Error:', fallbackErr);
+                }
+            }
+        }
+
+        function exportToCsv() {
+            const table = document.querySelector('.table');
+            if (!table) {
+                showNotification('No data to export!', 'warning');
+                return;
+            }
+
+            try {
+                let csv = [];
+                
+                // Get headers
+                const headers = Array.from(table.querySelectorAll('thead th'))
+                    .map(th => `"${th.textContent.trim().replace(/"/g, '""')}"`);
+                csv.push(headers.join(','));
+
+                // Get data rows
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const row = Array.from(tr.querySelectorAll('td'))
+                        .map(td => `"${td.textContent.trim().replace(/"/g, '""')}"`);
+                    csv.push(row.join(','));
+                });
+
+                // Create and download CSV file
+                const csvContent = csv.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `query_results_${timestamp}.csv`;
+
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showNotification('CSV file exported successfully!', 'success');
+            } catch (error) {
+                showNotification('Failed to export CSV file', 'error');
+                console.error('CSV Export Error:', error);
+            }
+        }
+
+        document.getElementById('queryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const startTime = performance.now();
+            
+            const model = document.getElementById('modelSelect').value;
+            const filters = document.querySelectorAll('#filters .filter-row');
+            const queryParams = [];
+
+            filters.forEach(function(row) {
+                const key = row.querySelector('input[name="key"]').value.trim();
+                const value = row.querySelector('input[name="value"]').value.trim();
+                if (key && value) {
+                    queryParams.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                }
+            });
+
+            const queryString = queryParams.join('&');
+            let url = '/query/' + model + '/';
+            if (queryString) {
+                url += '?' + queryString;
+            }
+            
+            showLoading();
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const endTime = performance.now();
+                    updateStats(endTime - startTime, data.length);
+                    
+                    const tableHtml = buildTable(data);
+                    document.getElementById('results').innerHTML = tableHtml;
+                })
+                .catch(error => {
+                    document.getElementById('results').innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Error: ${error}
+                        </div>
+                    `;
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        });
+    </script>
+</body>
+</html>

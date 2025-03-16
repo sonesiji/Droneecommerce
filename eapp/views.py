@@ -963,6 +963,7 @@ def get_booked_slots(request):
 from django.shortcuts import render
 from django.http import JsonResponse
 import google.generativeai as genai
+import re
 
 # Configure API key
 api_key = "AIzaSyBvgdIgptWKRrICvcbmp5uSfmxDN974rkQ"
@@ -971,20 +972,56 @@ genai.configure(api_key=api_key)
 # Initialize the model
 model = genai.GenerativeModel('gemini-1.5-flash')
 
+def clean_response(text):
+    """
+    Cleans the AI response by:
+    - Removing timestamps, sender names, and asterisks.
+    - Preserving line breaks and adding spacing.
+    """
+    # Remove timestamps (e.g., "9:52:07 PM")
+    text = re.sub(r"\d{1,2}:\d{2}:\d{2} [APap][Mm]", "", text)
+
+    # Remove role identifiers like "You", "AI Assistant", etc.
+    text = re.sub(r"^(AI|You|User|Assistant)\s*[\n]?", "", text, flags=re.MULTILINE)
+
+    # Remove asterisks (*) but replace them with proper bullet points
+    text = text.replace("*", "-")  
+
+    # Add space after punctuation if missing
+    text = re.sub(r"(?<=[.,!?])(?=[^\s])", " ", text)
+
+    # Remove excessive newlines and spaces
+    text = re.sub(r"\n{2,}", "\n\n", text)  # Preserve paragraph breaks
+    text = text.strip()
+
+    return text
+
 def generate_text(request):
     if request.method == 'POST':
         user_input = request.POST.get('input_text', '')
         if user_input:
             try:
-                # Call generate_content
+                # Generate response from the model
                 response = model.generate_content(user_input)
-                # Access the text directly if it's an attribute
-                generated_text = response.text if hasattr(response, 'text') else 'No text found'
+                
+                # Extract text properly
+                if hasattr(response, 'text') and response.text:
+                    generated_text = clean_response(response.text)
+                elif hasattr(response, 'candidates'):
+                    generated_text = "\n\n".join(
+                        clean_response(part.text) for part in response.candidates[0].content.parts if hasattr(part, 'text')
+                    )
+                else:
+                    generated_text = "No structured response found."
+
+                # Return formatted response
                 return JsonResponse({'generated_text': generated_text})
+
             except Exception as e:
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'No input text provided'}, status=400)
+    
     return render(request, 'generate_text.html')
 
 
@@ -1632,3 +1669,414 @@ def booking_view(request):
     }
     return render(request, 'slot_booking.html', context)
 
+
+
+
+# views.py
+
+from django.shortcuts import render
+from django.http import JsonResponse, HttpResponseNotFound
+from django.views.decorators.http import require_http_methods
+from .models import (
+    Address, Customer, Seller, Category, Subcategory, Product, Cart, Order,
+    OrderItem, PurchaseOrder, PurchaseOrderItem, POMessage, Instructor,
+    BookingSlot, UserBooking
+)
+
+# Mapping of model names to model classes
+MODEL_MAPPING = {
+    'address': Address,
+    'customer': Customer,
+    'seller': Seller,
+    'category': Category,
+    'subcategory': Subcategory,
+    'product': Product,
+    'cart': Cart,
+    'order': Order,
+    'orderitem': OrderItem,
+    'purchaseorder': PurchaseOrder,
+    'purchaseorderitem': PurchaseOrderItem,
+    'pomessage': POMessage,
+    'instructor': Instructor,
+    'bookingslot': BookingSlot,
+    'userbooking': UserBooking,
+}
+
+@require_http_methods(["GET"])
+def query_tool(request, model_name):
+    """
+    A generic query view that allows filtering on any model.
+    URL example: /query/product/?price=19.99&city=NewYork
+    """
+    model = MODEL_MAPPING.get(model_name.lower())
+    if not model:
+        return HttpResponseNotFound("Model not found.")
+
+    # Start with all objects for the given model and apply filters from GET parameters.
+    queryset = model.objects.all()
+    filter_kwargs = {}
+    for key, value in request.GET.items():
+        filter_kwargs[key] = value
+    queryset = queryset.filter(**filter_kwargs)
+
+    # Return results as JSON.
+    data = list(queryset.values())
+    return JsonResponse(data, safe=False)
+
+def query_tool_page(request):
+    """
+    Renders the HTML page for the generic query tool.
+    """
+    return render(request, "query_tool.html")
+
+
+
+
+from django.shortcuts import render
+from django.db.models import Count
+from .models import Order
+
+from django.shortcuts import render
+from django.db.models import Count
+from collections import defaultdict
+from .models import Order
+
+
+
+
+
+
+# from django.shortcuts import render
+# from django.db.models import Count
+# from collections import defaultdict
+# from .models import Order
+
+# def order_dashboard(request):
+#     # 1. Order status bar chart data
+#     orders_by_status = Order.objects.values('status').annotate(count=Count('id')).order_by('status')
+#     statuses = [entry['status'] for entry in orders_by_status]
+#     counts = [entry['count'] for entry in orders_by_status]
+
+#     # 2. Total revenue calculation
+#     # Convert each total_price (Decimal) to float to avoid mixing types
+#     total_revenue = sum(float(order.total_price()) for order in Order.objects.all())
+    
+#     # 3. Sales analysis: group orders by day and sum their total price
+#     sales_by_day = defaultdict(float)
+#     orders = Order.objects.all()
+#     for order in orders:
+#         day = order.order_date.date()
+#         sales_by_day[day] += float(order.total_price())  # Cast Decimal to float here
+#     sorted_days = sorted(sales_by_day.keys())
+#     sales_dates = [day.strftime('%Y-%m-%d') for day in sorted_days]
+#     sales_values = [sales_by_day[day] for day in sorted_days]
+    
+#     # 4. Refund analysis: count refunded vs non-refunded orders
+#     refunded_count = Order.objects.filter(status='Refunded').count()
+#     non_refunded_count = Order.objects.exclude(status='Refunded').count()
+#     refund_labels = ['Refunded', 'Non-Refunded']
+#     refund_counts = [refunded_count, non_refunded_count]
+    
+#     context = {
+#         'statuses': statuses,
+#         'counts': counts,
+#         'total_revenue': total_revenue,
+#         'sales_dates': sales_dates,
+#         'sales_values': sales_values,
+#         'refund_labels': refund_labels,
+#         'refund_counts': refund_counts,
+#     }
+#     return render(request, 'dashboard.html', context)
+
+# from django.db.models import Count, Sum, F, Case, When, Value, CharField, Avg
+# from django.db.models.functions import TruncMonth
+# from collections import defaultdict
+# from django.shortcuts import render
+# from django.utils import timezone
+# from datetime import timedelta
+
+# def order_dashboard(request):
+#     # Key Metrics
+#     total_orders = Order.objects.count()
+#     total_revenue = sum(float(order.total_price()) for order in Order.objects.all())
+#     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+#     active_products = Product.objects.filter(quantity_in_stock__gt=0).count()
+
+#     # 1. Order Status Distribution
+#     orders_by_status = Order.objects.values('status').annotate(count=Count('id')).order_by('status')
+#     statuses = [entry['status'] for entry in orders_by_status]
+#     status_counts = [entry['count'] for entry in orders_by_status]
+
+#     # 2. Sales Trend
+#     sales_by_day = defaultdict(float)
+#     orders = Order.objects.all()
+#     for order in orders:
+#         day = order.order_date.date()
+#         sales_by_day[day] += float(order.total_price())
+#     sorted_days = sorted(sales_by_day.keys())
+#     sales_dates = [day.strftime('%Y-%m-%d') for day in sorted_days]
+#     sales_values = [sales_by_day[day] for day in sorted_days]
+
+#     # 3. Refund Analysis
+#     refunded_count = Order.objects.filter(status='Refunded').count()
+#     non_refunded_count = Order.objects.exclude(status='Refunded').count()
+#     refund_labels = ['Refunded', 'Non-Refunded']
+#     refund_counts = [refunded_count, non_refunded_count]
+
+#     # 4. Product Performance
+#     top_products = OrderItem.objects.values(
+#         'product__name'
+#     ).annotate(
+#         total_sold=Sum('quantity'),
+#         revenue=Sum(F('quantity') * F('product__price'))
+#     ).order_by('-revenue')[:5]
+    
+#     product_names = [item['product__name'] for item in top_products]
+#     product_quantities = [item['total_sold'] for item in top_products]
+#     product_revenues = [float(item['revenue']) for item in top_products]
+
+#     # 5. Category Distribution
+#     category_data = OrderItem.objects.values(
+#         'product__subcategory__parent_category__category_name'
+#     ).annotate(
+#         total_revenue=Sum(F('quantity') * F('product__price'))
+#     ).order_by('-total_revenue')
+    
+#     category_names = [item['product__subcategory__parent_category__category_name'] for item in category_data]
+#     category_revenues = [float(item['total_revenue']) for item in category_data]
+
+#     # 6. Inventory Status
+#     inventory_status = Product.objects.annotate(
+#         status=Case(
+#             When(quantity_in_stock=0, then=Value('Out of Stock')),
+#             When(quantity_in_stock__lte=F('reorder_level'), then=Value('Low Stock')),
+#             default=Value('Healthy'),
+#             output_field=CharField(),
+#         )
+#     ).values('status').annotate(count=Count('id'))
+    
+#     inventory_labels = [item['status'] for item in inventory_status]
+#     inventory_counts = [item['count'] for item in inventory_status]
+
+#     # 7. Customer Analysis
+#     top_customers = Order.objects.values(
+#         'customer__customer_name'
+#     ).annotate(
+#         order_count=Count('id'),
+#         total_spent=Sum('orderitem__quantity' * F('orderitem__product__price'))
+#     ).order_by('-total_spent')[:5]
+    
+#     customer_names = [item['customer__customer_name'] for item in top_customers]
+#     customer_orders = [item['order_count'] for item in top_customers]
+#     customer_spending = [float(item['total_spent']) for item in top_customers]
+
+#     context = {
+#         # Key Metrics
+#         'total_orders': total_orders,
+#         'total_revenue': total_revenue,
+#         'avg_order_value': avg_order_value,
+#         'active_products': active_products,
+        
+#         # Chart Data
+#         'statuses': statuses,
+#         'status_counts': status_counts,
+#         'sales_dates': sales_dates,
+#         'sales_values': sales_values,
+#         'refund_labels': refund_labels,
+#         'refund_counts': refund_counts,
+#         'product_names': product_names,
+#         'product_quantities': product_quantities,
+#         'product_revenues': product_revenues,
+#         'category_names': category_names,
+#         'category_revenues': category_revenues,
+#         'inventory_labels': inventory_labels,
+#         'inventory_counts': inventory_counts,
+#         'customer_names': customer_names,
+#         'customer_orders': customer_orders,
+#         'customer_spending': customer_spending,
+#     }
+    
+#     return render(request, 'dashboard.html', context)
+from django.db.models import Count, Sum, F, Case, When, Value, CharField, Avg
+from django.db.models import Count, Sum, F, Case, When, Value, CharField, DecimalField
+from collections import defaultdict
+from django.shortcuts import render
+from django.db.models.functions import Cast
+
+def order_dashboard(request):
+    # Key Metrics
+    total_orders = Order.objects.count()
+    total_revenue = sum(float(order.total_price()) for order in Order.objects.all())
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+    active_products = Product.objects.filter(quantity_in_stock__gt=0).count()
+
+    # 1. Order Status Distribution
+    orders_by_status = Order.objects.values('status').annotate(count=Count('id')).order_by('status')
+    statuses = [entry['status'] for entry in orders_by_status]
+    status_counts = [entry['count'] for entry in orders_by_status]
+
+    # 2. Sales Trend
+    sales_by_day = defaultdict(float)
+    orders = Order.objects.all()
+    for order in orders:
+        day = order.order_date.date()
+        sales_by_day[day] += float(order.total_price())
+    sorted_days = sorted(sales_by_day.keys())
+    sales_dates = [day.strftime('%Y-%m-%d') for day in sorted_days]
+    sales_values = [sales_by_day[day] for day in sorted_days]
+
+    # 3. Refund Analysis
+    refunded_count = Order.objects.filter(status='Refunded').count()
+    non_refunded_count = Order.objects.exclude(status='Refunded').count()
+    refund_labels = ['Refunded', 'Non-Refunded']
+    refund_counts = [refunded_count, non_refunded_count]
+
+    # 4. Product Performance
+    top_products = OrderItem.objects.values(
+        'product__name'
+    ).annotate(
+        total_sold=Sum('quantity'),
+        revenue=Sum(F('quantity') * Cast('product__price', DecimalField()))
+    ).order_by('-revenue')[:5]
+    
+    product_names = [item['product__name'] for item in top_products]
+    product_quantities = [item['total_sold'] for item in top_products]
+    product_revenues = [float(item['revenue']) for item in top_products]
+
+    # 5. Category Distribution
+    category_data = OrderItem.objects.values(
+        'product__subcategory__parent_category__category_name'
+    ).annotate(
+        total_revenue=Sum(F('quantity') * Cast('product__price', DecimalField()))
+    ).order_by('-total_revenue')
+    
+    category_names = [item['product__subcategory__parent_category__category_name'] for item in category_data]
+    category_revenues = [float(item['total_revenue']) for item in category_data]
+
+    # 6. Inventory Status
+    inventory_status = Product.objects.annotate(
+        status=Case(
+            When(quantity_in_stock=0, then=Value('Out of Stock')),
+            When(quantity_in_stock__lte=F('reorder_level'), then=Value('Low Stock')),
+            default=Value('Healthy'),
+            output_field=CharField(),
+        )
+    ).values('status').annotate(count=Count('id'))
+    
+    inventory_labels = [item['status'] for item in inventory_status]
+    inventory_counts = [item['count'] for item in inventory_status]
+
+    # 7. Customer Analysis
+    top_customers = Order.objects.values(
+        'customer__customer_name'
+    ).annotate(
+        order_count=Count('id'),
+        total_spent=Sum(
+            F('orderitem__quantity') * Cast('orderitem__product__price', DecimalField())
+        )
+    ).order_by('-total_spent')[:5]
+    
+    customer_names = [item['customer__customer_name'] for item in top_customers]
+    customer_orders = [item['order_count'] for item in top_customers]
+    customer_spending = [float(item['total_spent']) for item in top_customers]
+
+    context = {
+        # Key Metrics
+        'total_orders': total_orders,
+        'total_revenue': total_revenue,
+        'avg_order_value': avg_order_value,
+        'active_products': active_products,
+        
+        # Chart Data
+        'statuses': statuses,
+        'status_counts': status_counts,
+        'sales_dates': sales_dates,
+        'sales_values': sales_values,
+        'refund_labels': refund_labels,
+        'refund_counts': refund_counts,
+        'product_names': product_names,
+        'product_quantities': product_quantities,
+        'product_revenues': product_revenues,
+        'category_names': category_names,
+        'category_revenues': category_revenues,
+        'inventory_labels': inventory_labels,
+        'inventory_counts': inventory_counts,
+        'customer_names': customer_names,
+        'customer_orders': customer_orders,
+        'customer_spending': customer_spending,
+    }
+    
+    return render(request, 'dashboard.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .chatbot import EnhancedEcommerceBot
+
+chatbot = EnhancedEcommerceBot()
+
+def chat_view(request):
+    return render(request, 'chat.html')
+
+@csrf_exempt
+def chatbot_message(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            message = data.get('message', '')
+            user_id = request.session.get('user_id', 'anonymous')
+            
+            response = chatbot.process_message(message, user_id)
+            
+            return JsonResponse({
+                'status': 'success',
+                'response': response
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed'
+    }, status=405)

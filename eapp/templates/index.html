@@ -17,6 +17,66 @@
     align-items: center;
     justify-content: center;
   }
+  #chatbot-icon {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #002752, #0056b3);
+    color: white;
+    border-radius: 50%;
+    width: 85px;
+    height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    cursor: pointer;
+    box-shadow: 0px 0px 12px rgba(0, 102, 255, 0.6);
+    transition: all 0.3s ease-in-out;
+    animation: pulse 2s infinite;
+    position: relative;
+  }
+
+  #chatbot-icon:hover {
+    background: linear-gradient(135deg, #001f40, #003580);
+    transform: scale(1.2);
+    box-shadow: 0px 0px 20px rgba(0, 102, 255, 1);
+  }
+
+  .lucide {
+    width: 55px;
+    height: 55px;
+    stroke-width: 2;
+  }
+
+  /* Speech Bubble Effect */
+  #chatbot-icon::after {
+    content: "Let's Chat!";
+    position: absolute;
+    bottom: 110%;
+    background: white;
+    color: #003580;
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease-in-out;
+    pointer-events: none;
+  }
+
+  #chatbot-icon:hover::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Pulsing Animation */
+  @keyframes pulse {
+    0% { box-shadow: 0px 0px 12px rgba(0, 102, 255, 0.6); }
+    50% { box-shadow: 0px 0px 20px rgba(0, 102, 255, 0.8); }
+    100% { box-shadow: 0px 0px 12px rgba(0, 102, 255, 0.6); }
+  }
 
   #cart-button:hover {
     background-color: #fe4536; /* Highlighted color on hover */
@@ -66,6 +126,7 @@
     font-size: 24px; /* Icon size */
   }
 </style>
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <!-- slider-area start -->
 <section class="slider-area pos-relative">
@@ -302,8 +363,11 @@
 
 <!-- Chatbot Icon -->
 <div id="chatbot-icon" onclick="window.location.href='/generate_text/'">
-  <i class="fas fa-comment-dots"></i> <!-- Font Awesome Icon -->
+  <i data-lucide="bot"></i> <!-- Lucide Chatbot Icon -->
 </div>
+<script>
+  lucide.createIcons(); // Activate Lucide Icons
+</script>
 
 <!-- Include Font Awesome -->
 <link

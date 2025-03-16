@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* You can keep this minimal CSS in the head for critical styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+    </style>
+</head>
+<body style="font-family: 'Inter', sans-serif; background-color: #f0f2f5; height: 100vh; margin: 0;">
+    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; width: 380px; height: 600px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; transition: all 0.3s ease; z-index: 1000;">
+        
+        <!-- Chat Header -->
+        <div style="background: linear-gradient(135deg, #0062ff 0%, #0047bd 100%); color: white; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: #ffffff33; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-robot" style="font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0;">Enterprise Assistant</h3>
+                    <span style="font-size: 12px; opacity: 0.8;">Online</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="minimizeChat()" style="background: none; border: none; color: white; cursor: pointer; padding: 8px; border-radius: 4px; transition: background 0.2s;">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button onclick="clearChat()" style="background: none; border: none; color: white; cursor: pointer; padding: 8px; border-radius: 4px; transition: background 0.2s;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: #f8f9fa;">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <!-- Quick Replies -->
+        <div style="padding: 12px; background: white; border-top: 1px solid #eef0f2; display: flex; flex-wrap: wrap; gap: 8px;">
+            <button onclick="sendQuickReply('Show products')" style="background: #f0f2f5; border: 1px solid #e4e6eb; border-radius: 16px; padding: 8px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: #1d2129; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-shopping-bag"></i> Products
+            </button>
+            <button onclick="sendQuickReply('Check order status')" style="background: #f0f2f5; border: 1px solid #e4e6eb; border-radius: 16px; padding: 8px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: #1d2129; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-truck"></i> Orders
+            </button>
+            <button onclick="sendQuickReply('Book appointment')" style="background: #f0f2f5; border: 1px solid #e4e6eb; border-radius: 16px; padding: 8px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: #1d2129; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-calendar"></i> Bookings
+            </button>
+            <button onclick="sendQuickReply('Help')" style="background: #f0f2f5; border: 1px solid #e4e6eb; border-radius: 16px; padding: 8px 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: #1d2129; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-question-circle"></i> Help
+            </button>
+        </div>
+
+        <!-- Chat Input -->
+        <div style="padding: 16px; background: white; border-top: 1px solid #eef0f2;">
+            <div style="display: flex; gap: 12px; background: #f0f2f5; border-radius: 24px; padding: 8px 16px; align-items: center;">
+                <input type="text" id="messageInput" placeholder="Type your message..." style="flex: 1; border: none; background: none; outline: none; font-size: 14px; color: #1d2129; padding: 8px 0;">
+                <button onclick="sendMessage()" id="sendButton" style="background: #0062ff; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+                    <i class="fas fa-paper-plane" style="font-size: 14px;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Footer -->
+        <div style="padding: 8px; text-align: center; font-size: 12px; color: #65676b; background: white; border-top: 1px solid #eef0f2;">
+            Powered by Enterprise AI Assistant
+        </div>
+    </div>
+
+    <script>
+        let isTyping = false;
+        let chatHistory = [];
+
+        function addMessage(message, isUser) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            // Message container style
+            messageDiv.style.maxWidth = '80%';
+            messageDiv.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+            messageDiv.style.animation = 'slideIn 0.3s ease';
+            
+            // Message bubble style
+            const bubbleStyle = `
+                background: ${isUser ? '#0062ff' : 'white'};
+                color: ${isUser ? 'white' : '#1d2129'};
+                padding: 12px 16px;
+                border-radius: 12px;
+                border-bottom-${isUser ? 'right' : 'left'}-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin-bottom: 4px;
+                word-wrap: break-word;
+            `;
+            
+            // Time style
+            const timeStyle = `
+                font-size: 11px;
+                color: #65676b;
+                text-align: ${isUser ? 'right' : 'left'};
+            `;
+
+            messageDiv.innerHTML = `
+                <div style="${bubbleStyle}">${message}</div>
+                <div style="${timeStyle}">${new Date().toLocaleTimeString()}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Save to chat history
+            chatHistory.push({
+                message: message,
+                isUser: isUser,
+                time: new Date().toISOString()
+            });
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const indicator = document.createElement('div');
+            indicator.id = 'typingIndicator';
+            indicator.style.cssText = `
+                background: white;
+                padding: 12px 16px;
+                border-radius: 12px;
+                align-self: flex-start;
+                display: flex;
+                gap: 4px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            `;
+
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    width: 8px;
+                    height: 8px;
+                    background: #65676b;
+                    border-radius: 50%;
+                    animation: bounce 1.4s infinite ease-in-out;
+                    animation-delay: ${i * 0.16}s;
+                `;
+                indicator.appendChild(dot);
+            }
+
+            chatMessages.appendChild(indicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            const sendButton = document.getElementById('sendButton');
+            
+            if (!message || isTyping) return;
+            
+            input.disabled = true;
+            sendButton.disabled = true;
+            isTyping = true;
+            
+            addMessage(message, true);
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/chatbot/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                hideTypingIndicator();
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addMessage(data.response, false);
+                } else {
+                    addMessage('I apologize, but I encountered an error. Please try again.', false);
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('I apologize, but I encountered an error. Please try again.', false);
+            } finally {
+                input.disabled = false;
+                sendButton.disabled = false;
+                isTyping = false;
+                input.focus();
+            }
+        }
+
+        function sendQuickReply(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        function minimizeChat() {
+            const widget = document.getElementById('chatWidget');
+            if (widget.style.height === '60px') {
+                widget.style.height = '600px';
+                widget.style.width = '380px';
+            } else {
+                widget.style.height = '60px';
+                widget.style.width = '380px';
+            }
+        }
+
+        function clearChat() {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                document.getElementById('chatMessages').innerHTML = '';
+                chatHistory = [];
+                localStorage.removeItem('chatHistory');
+                loadWelcomeMessage();
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function loadWelcomeMessage() {
+            try {
+                const response = await fetch('/api/chatbot/');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessage(data.response, false);
+                }
+            } catch (error) {
+                addMessage('Welcome! How can I assist you today?', false);
+            }
+        }
+
+        // Initialize chat
+        window.addEventListener('load', function() {
+            const savedHistory = localStorage.getItem('chatHistory');
+            if (savedHistory) {
+                JSON.parse(savedHistory).forEach(item => {
+                    addMessage(item.message, item.isUser);
+                });
+            } else {
+                loadWelcomeMessage();
+            }
+        });
+
+        // Handle Enter key
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Add keyframe animation for messages
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes bounce {
+                0%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-6px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
