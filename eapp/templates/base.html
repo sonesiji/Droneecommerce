@@ -436,11 +436,12 @@
             <div class="col-xl-3 col-lg-6 col-md-6 col-5 col-sm-9 pl-0">
               <div class="header-right f-right">
                 <ul>
-                  <li class="search-btn">
+                  <!-- <li class="search-btn">
+                    
                     <a class="search-btn nav-search search-trigger" href="#"
                       ><i class="fas fa-search"></i
                     ></a>
-                  </li>
+                  </li> -->
                   {% if user.is_authenticated %}
                   <!-- If user is authenticated, display account button and logout button -->
                   <li class="d-shop-cart">
@@ -457,6 +458,9 @@
                       </li>
                       <li>
                         <a href="{% url 'address_list' %}">Adresses</a>
+                      </li>
+                      <li>
+                        <a href="{% url 'view_wishlist' %}">WishList</a>
                       </li>
                     </ul>
                   </li>
@@ -477,11 +481,11 @@
                   {% endif %}
       
                   <li class="cart-btn">
-          <a href="{% url 'cart' %}" class="cart-link">
-              <span class="cart-icon">
-                  <i class="fas fa-shopping-cart"></i> <span class="cart-count">(0)</span> </span>
-             
-          </a>
+                    <a href="{% url 'cart' %}" class="cart-link">
+                      <span class="cart-icon">
+                          <i class="fas fa-shopping-cart"></i> <span class="cart-count">({{ cart_items_count }})</span>
+                      </span>
+                  </a>
       </li>
                 </ul>
               </div>
@@ -774,7 +778,6 @@
     <script src="{% static 'js/jquery.meanmenu.min.js' %}"></script>
     <script src="{% static 'js/ajax-form.js' %}"></script>
     <script src="{% static 'js/wow.min.js' %}"></script>
-    <script src="{% static 'js/jquery.scrollUp.min.js' %}"></script>
     <script src="{% static 'js/jquery.final-countdown.min.js' %}"></script>
     <script src="{% static 'js/imagesloaded.pkgd.min.js' %}"></script>
     <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>

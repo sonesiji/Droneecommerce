@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="wishlist-area pt-70 pb-40">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">My Wishlist</h2>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if wishlist_items %}
+                    <div class="row">
+                        {% for item in wishlist_items %}
+                            <div class="col-lg-3 col-md-4 col-sm-6">
+                                <div class="product-wrapper mb-50">
+                                    <div class="product-img mb-25">
+                                        <a href="{% url 'product_detail' item.product.id %}">
+                                            <img src="{{ item.product.image_1.url }}" alt="{{ item.product.name }}" />
+                                        </a>
+                                        <div class="product-action text-center d-flex justify-content-center align-items-center gap-2">
+                                            <form action="{% url 'add_to_cart' %}" method="post" style="display: inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" id="cart-button" style="border: none; background: none;">
+                                                    <i class="fas fa-shopping-cart" style="color: #f0f0f0; font-size: 24px;"></i>
+                                                  </button>
+                                            </form>
+                                        
+                                            <a href="{% url 'remove_from_wishlist' item.product.id %}" 
+                                               title="Remove from Wishlist" 
+                                               class="btn text-danger d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="product-content">
+                                        <h3><a href="{% url 'product_detail' item.product.id %}">{{ item.product.name }}</a></h3>
+                                        <div class="product-meta">
+                                            <div class="pro-price">
+                                                <span>RS {{ item.product.price }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h4>Your wishlist is empty</h4>
+                        <a href="{% url 'index' %}" class="btn btn-primary mt-3">Continue Shopping</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

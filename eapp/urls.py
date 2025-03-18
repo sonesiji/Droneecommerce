@@ -75,7 +75,17 @@ path('query/', query_tool_page, name='query_tool_page'),
      path('dashboard/', order_dashboard, name='order_dashboard'),
       path('api/chatbot/', views.chatbot_message, name='chatbot_message'),
 
-     path('chat/', views.chat_view, name='chat_view'), 
+     
+     path('chatbot/', views.chatbot, name='chatbot'),
+    
+    # ... other URL patterns ...
+    path('wishlist/add/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('wishlist/remove/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    path('wishlist/', views.view_wishlist, name='view_wishlist'),
+     path('comparison/add/', views.add_to_comparison, name='add_to_comparison'),
+    path('comparison/remove/<int:product_id>/', views.remove_from_comparison, name='remove_from_comparison'),
+    path('comparison/', views.view_comparison, name='view_comparison'),
+
 
 
 

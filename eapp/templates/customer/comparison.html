@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Comparison</title>
+</head>
+<body style="font-family: 'Arial', sans-serif; background-color: #f8f9fc; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center;">
+
+    <div style="max-width: 1100px; width: 100%; background: #ffffff; padding: 30px; 
+                border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.15);">
+        
+        <h1 style="text-align: center; color: #2c3e50; font-size: 28px; font-weight: bold; margin-bottom: 20px;">
+            Drone Comparison
+        </h1>
+
+        {% if products %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #1d3557; color: white; text-align: left;">
+                            <th style="padding: 16px; border-bottom: 4px solid #457b9d;">Product</th>
+                            {% for key in spec_keys %}
+                                <th style="padding: 16px; border-bottom: 4px solid #457b9d;">{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr style="border-bottom: 1px solid #ddd; background-color: #ffffff; transition: 0.3s;">
+                                <td style="padding: 20px; width: 250px;">
+                                    <h2 style="margin: 0; font-size: 20px; color: #1d3557;">{{ product.name }}</h2>
+                                    <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">{{ product.description }}</p>
+                                    <p style="margin: 5px 0; font-weight: bold; color: #e63946;">Price: RS:{{ product.price }}</p>
+                                    <form action="{% url 'remove_from_comparison' product.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                style="background-color: #e63946; color: white; border: none; padding: 10px 16px; 
+                                                       border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; 
+                                                       transition: background 0.3s ease; margin-top: 10px;">
+                                            Remove
+                                        </button>
+                                    </form>
+                                </td>
+                                {% for key in spec_keys %}
+                             
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #6c757d; font-size: 17px; margin-top: 20px;">
+                No products added to comparison.
+            </p>
+        {% endif %}
+
+        <a href="{% url 'product_list' %}" 
+           style="display: block; text-align: center; margin-top: 25px; text-decoration: none; 
+                  background: #457b9d; color: white; padding: 14px 22px; 
+                  border-radius: 8px; font-size: 16px; font-weight: bold; transition: 0.3s; max-width: 300px; margin-left: auto; margin-right: auto;">
+            Back to Product List
+        </a>
+    </div>
+
+</body>
+</html>

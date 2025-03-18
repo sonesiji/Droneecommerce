@@ -431,4 +431,31 @@ class UserBooking(models.Model):
         super().save(*args, **kwargs)
         self.slot.is_booked = True
         self.slot.save()
+
+class Wishlist(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    added_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('customer', 'product')  # Prevent duplicate wishlist items
+        
+    def __str__(self):
+        return f"{self.customer.customer_name}'s wishlist - {self.product.name}"
     
+
+
+
+class ComparisonList(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Product)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user'], name='unique_comparison_list_per_user')
+        ]
+
+    def __str__(self):
+        return f"Comparison List - {self.user.username}"
+

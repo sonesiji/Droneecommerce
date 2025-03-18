@@ -1034,6 +1034,14 @@ def generate_text(request):
 
 
 
+
+
+
+
+
+
+
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import BookingSlot, UserBooking
@@ -2080,3 +2088,509 @@ def chatbot_message(request):
         'status': 'error',
         'message': 'Method not allowed'
     }, status=405)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+import google.generativeai as genai
+import os
+from django.db.models import Avg, Count, F, Q, Max, Min, Sum
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import datetime, timedelta
+
+# Import your models
+from .models import (
+    Category, Subcategory, Product, Cart, Order, OrderItem,
+    Instructor, BookingSlot, UserBooking, Customer, Seller,
+    PurchaseOrder, PurchaseOrderItem
+)
+
+def chatbot(request):
+    """View for displaying and handling the chatbot interface"""
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        user_message = request.POST.get('message', '').strip()
+        
+        if not user_message:
+            return JsonResponse({'error': 'Please enter a message'})
+        
+        try:
+            # Get user session info if available for personalization
+            user_id = request.session.get('user_id')
+            user_type = request.session.get('user_type')
+            
+            # Prepare chatbot response using Gemini API
+            response_data = generate_chatbot_response(user_message, user_id, user_type)
+            
+            if isinstance(response_data, dict):
+                return JsonResponse(response_data)
+            else:
+                return JsonResponse({'response': response_data})
+        except Exception as e:
+            print(f"Chatbot error: {str(e)}")  # Add logging for debugging
+            return JsonResponse({'error': f"Error processing your request: {str(e)}"})
+    
+    # For GET requests, render the chatbot interface
+    context = {
+        'initial_message': "Hello! I'm your drone training assistant. How can I help you today?"
+    }
+    return render(request, 'chatbot.html', context)
+
+def generate_chatbot_response(user_message, user_id=None, user_type=None):
+    """Generate response using Gemini API enriched with database lookups"""
+    # Check if API key exists
+    api_key = "AIzaSyBvgdIgptWKRrICvcbmp5uSfmxDN974rkQ"
+    if not api_key:
+        return {'response': "ERROR: Gemini API key not found. Please set the GEMINI_API_KEY environment variable."}
+    
+    # Configure Gemini API
+    genai.configure(api_key=api_key)
+    
+    # Define generation config for model
+    generation_config = {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_output_tokens": 8192,
+        "response_mime_type": "text/plain",
+    }
+    
+    # Initialize context information
+    db_context = ""
+    personalized_context = ""
+    query_type = "general"
+    
+    # Personalize if user is logged in
+    if user_id and user_type == 'customer':
+        try:
+            customer = Customer.objects.get(id=user_id)
+            personalized_context = f"Customer: {customer.customer_name}\n"
+            
+            # Check if user is asking about orders
+            if any(word in user_message.lower() for word in ['my order', 'my orders', 'order status']):
+                orders = Order.objects.filter(customer=customer).order_by('-order_date')
+                if orders.exists():
+                    personalized_context += "\nOrder History:\n"
+                    for i, order in enumerate(orders[:5], 1):  # Show last 5 orders
+                        personalized_context += f"\nOrder #{order.id} - {order.order_date.strftime('%Y-%m-%d')}\n"
+                        personalized_context += f"Status: {order.status}\n"
+                        personalized_context += f"Total: ₹{order.total_price()}\n"
+                        personalized_context += "Products:\n"
+                        
+                        for order_item in order.orderitem_set.all():
+                            personalized_context += f"- {order_item.quantity}x {order_item.product.name} (₹{order_item.product.price} each)\n"
+                        
+                        # Add a view link for the order
+                        personalized_context += f"[View Order Details: <a href='/orders/{order.id}/'>Order #{order.id}</a>]\n"
+                        
+                        if i < min(5, orders.count()):
+                            personalized_context += "----------\n"
+                    
+                    # Add link to view all orders
+                    if orders.count() > 5:
+                        personalized_context += f"\n[View all {orders.count()} orders: <a href='/my-orders/'>My Orders</a>]\n"
+                else:
+                    personalized_context += "\nYou don't have any orders yet.\n"
+                    personalized_context += "[Start shopping: <a href='/products/'>Shop Now</a>]\n"
+            
+            # Check if user is asking about bookings
+            elif any(word in user_message.lower() for word in ['appointment', 'booking', 'instructor', 'schedule', 'lesson']):
+                bookings = UserBooking.objects.filter(email=customer.email).order_by('slot__date')
+                if bookings.exists():
+                    personalized_context += "\nYour Booking Information:\n"
+                    
+                    # Show upcoming bookings first
+                    upcoming = bookings.filter(slot_date_gte=timezone.now().date())
+                    if upcoming.exists():
+                        personalized_context += "\n--- Upcoming Bookings ---\n"
+                        for booking in upcoming:
+                            personalized_context += f"\nBooking on {booking.slot.date}\n"
+                            personalized_context += f"Time: {booking.slot.time}\n"
+                            personalized_context += f"Instructor: {booking.slot.instructor.name}\n"
+                            personalized_context += f"[Booking Details: <a href='/my-bookings/{booking.id}/'>View Details</a>]\n"
+                    
+                    # Add link to manage bookings
+                    personalized_context += f"\n[Manage your bookings: <a href='/my-bookings/'>My Bookings</a>]\n"
+                else:
+                    personalized_context += "\nYou don't have any bookings scheduled.\n"
+                    personalized_context += "[Book a lesson: <a href='/book-instructor/'>Book Now</a>]\n"
+                
+            # Check if user has items in cart
+            cart_items = Cart.objects.filter(customer=customer)
+            if cart_items.exists():
+                personalized_context += "\nYou have items in your cart:\n"
+                total = 0
+                for item in cart_items:
+                    personalized_context += f"- {item.quantity}x {item.product.name} (₹{item.product.price} each)\n"
+                    total += item.sub_total()
+                personalized_context += f"\nCart total: ₹{total}\n"
+                personalized_context += "[View Cart: <a href='/cart/'>Go to Cart</a>]\n"
+                
+        except Exception as e:
+            print(f"Error getting personalization data: {str(e)}")
+    
+    # Classify the query type
+    user_message_lower = user_message.lower()
+    
+    # Define common keywords for different query types
+    product_terms = ['drone', 'product', 'buy', 'purchase', 'price', 'stock', 'category']
+    instructor_terms = ['instructor', 'teacher', 'trainer', 'lesson', 'training', 'experience', 'qualification']
+    booking_terms = ['book', 'booking', 'slot', 'schedule', 'appointment', 'time', 'date', 'availability']
+    order_terms = ['order', 'purchase', 'delivery', 'status', 'track', 'shipping']
+    
+    # Determine query type
+    if any(term in user_message_lower for term in product_terms):
+        query_type = "product_info"
+    elif any(term in user_message_lower for term in instructor_terms):
+        query_type = "instructor_info"
+    elif any(term in user_message_lower for term in booking_terms):
+        query_type = "booking_info"
+    elif any(term in user_message_lower for term in order_terms):
+        query_type = "order_info"
+    
+    # Handle product-related queries
+    if query_type == "product_info":
+        # Check for category mentions
+        categories = Category.objects.all()
+        mentioned_category = None
+        for category in categories:
+            if category.category_name.lower() in user_message_lower:
+                mentioned_category = category
+                break
+        
+        # Check for product name mentions
+        products = Product.objects.all()
+        mentioned_product = None
+        for product in products:
+            if product.name.lower() in user_message_lower:
+                mentioned_product = product
+                break
+        
+        # Provide context based on what was found
+        if mentioned_product:
+            db_context += f"Product Information: {mentioned_product.name}\n"
+            db_context += f"Price: ₹{mentioned_product.price}\n"
+            db_context += f"Description: {mentioned_product.description}\n"
+            db_context += f"In Stock: {mentioned_product.quantity_in_stock} units\n"
+            db_context += f"Category: {mentioned_product.subcategory.parent_category.category_name} > {mentioned_product.subcategory.subcategory_name}\n"
+            db_context += f"[View Product: <a href='/products/{mentioned_product.id}/'>Click here</a>]\n"
+        
+        elif mentioned_category:
+            # Get subcategories and products in this category
+            subcategories = Subcategory.objects.filter(parent_category=mentioned_category)
+            
+            db_context += f"Category: {mentioned_category.category_name}\n"
+            db_context += f"[Browse Category: <a href='/category/{mentioned_category.id}/'>View All Products</a>]\n\n"
+            
+            db_context += "Subcategories:\n"
+            for subcategory in subcategories[:5]:
+                db_context += f"- {subcategory.subcategory_name} [<a href='/subcategories/{subcategory.id}/'>Browse</a>]\n"
+            
+            # Get top products in this category
+            top_products = Product.objects.filter(subcategory__parent_category=mentioned_category).order_by('-quantity_in_stock')[:5]
+            
+            if top_products:
+                db_context += "\nPopular products in this category:\n"
+                for product in top_products:
+                    db_context += f"- {product.name}: ₹{product.price} [<a href='/product/<int:product_id>/'>View</a>]\n"
+        
+        else:
+            # General product information
+            top_products = Product.objects.all().order_by('-quantity_in_stock')[:5]
+            db_context += "Here are our top drone products:\n\n"
+            
+            for product in top_products:
+                db_context += f"- {product.name}: ₹{product.price}\n"
+                db_context += f"  Category: {product.subcategory.parent_category.category_name} > {product.subcategory.subcategory_name}\n"
+                db_context += f"  [View Details: <a href='/product/{product.id}/'>Product Link</a>]\n\n"
+            
+            db_context += "[Browse All Products: <a href='/product_list/'>View All Products</a>]"
+    
+    # Handle instructor-related queries
+    elif query_type == "instructor_info":
+        instructors = Instructor.objects.all().order_by('name')
+        
+        # Check for specific instructor mentions
+        mentioned_instructor = None
+        for instructor in instructors:
+            if instructor.name.lower() in user_message_lower:
+                mentioned_instructor = instructor
+                break
+        
+        if mentioned_instructor:
+            db_context += f"Instructor: {mentioned_instructor.name}\n"
+            db_context += f"Experience: {mentioned_instructor.experience[:100]}...\n"
+            db_context += f"RPC Number: {mentioned_instructor.rpc_number}\n"
+            db_context += f"Issued Date: {mentioned_instructor.issued_date}\n"
+            db_context += f"[View Profile: <a href='/instructors/{mentioned_instructor.id}/'>Click here</a>]\n"
+            
+            # Check available slots for this instructor
+            available_slots = BookingSlot.objects.filter(
+                instructor=mentioned_instructor,
+                date__gte=timezone.now().date(),
+                is_booked=False
+            ).order_by('date', 'time')[:5]
+            
+            if available_slots:
+                db_context += "\nUpcoming available slots:\n"
+                for slot in available_slots:
+                    db_context += f"- {slot.date} at {slot.time}\n"
+                
+                db_context += f"\n[Book a session: <a href='/book-instructor/{mentioned_instructor.id}/'>Book Now</a>]"
+            else:
+                db_context += "\nNo available slots at the moment. Check back later or contact us for custom scheduling."
+        
+        else:
+            db_context += "Our qualified drone instructors:\n\n"
+            for instructor in instructors[:5]:
+                db_context += f"- {instructor.name}: {instructor.experience[:50]}...\n"
+                # db_context += f"  [View Profile: <a href='/instructor/{instructor.id}/'>Instructor Details</a>]\n\n"
+            
+            db_context += "[View All Instructors: <a href='/instructor/'>Browse Instructors</a>]\n"
+    
+    # Handle booking-related queries
+    elif query_type == "booking_info":
+        # Get available slots
+        available_slots = BookingSlot.objects.filter(
+            date__gte=timezone.now().date(),
+            is_booked=False
+        ).order_by('date', 'time')[:10]
+        
+        db_context += "Booking Information:\n\n"
+        db_context += "To book a drone training session, you need to:\n"
+        db_context += "1. Select an instructor from our qualified team\n"
+        db_context += "2. Choose an available time slot that works for you\n"
+        db_context += "3. Complete the booking form with your details and drone specifications\n\n"
+        
+        if available_slots:
+            db_context += "Here are some upcoming available slots:\n"
+            for slot in available_slots:
+                db_context += f"- {slot.date} at {slot.time} with {slot.instructor.name}\n"
+            
+            db_context += "\n[Book a training session: <a href='/book-instructor/'>Book Now</a>]\n"
+        else:
+            db_context += "Currently all slots are booked. Please check back soon for new availability.\n"
+            db_context += "[Contact us for custom scheduling: <a href='/contact/'>Contact Us</a>]"
+    
+    # Handle order-related queries
+    elif query_type == "order_info":
+        db_context += "Order Information:\n\n"
+        db_context += "After placing an order on our website:\n"
+        db_context += "1. You'll receive an order confirmation email with your order details\n"
+        db_context += "2. Your order status will update as it progresses (Processing, Shipped, Delivered)\n"
+        db_context += "3. You can track your order status in your account dashboard\n\n"
+        
+        db_context += "For order tracking or issues, you can:\n"
+        db_context += "- Check your order status: [<a href='/my-orders/'>My Orders</a>]\n"
+        db_context += "- Contact customer support: [<a href='/contact/'>Contact Us</a>]\n"
+        db_context += "- View shipping policies: [<a href='/shipping-policy/'>Shipping Policy</a>]\n"
+    
+    # System instruction for the AI
+    system_instruction = """
+    You are a helpful drone training e-commerce assistant. You help customers find information about drone products,
+    instructors, booking training sessions, and managing orders.
+    
+    Key information:
+    - We sell drone products and offer professional drone training
+    - Our instructors are certified with RPC (Remote Pilot Certificate) credentials
+    - Customers can book one-on-one training sessions with our instructors
+    - We offer various drone categories and models for different skill levels and purposes
+    
+    Always be helpful, concise, and informative. If you don't know something, suggest that the customer contact customer service.
+    
+    IMPORTANT: When providing links, maintain the HTML <a> tag format exactly as provided in the context. Do not modify URLs.
+    
+    When customers ask about specific products, instructors, or bookings, emphasize the relevant information and include the
+    provided links to direct them to the appropriate pages on our website.
+    """
+    
+    # Create Gemini model
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-pro",
+        generation_config=generation_config,
+        system_instruction=system_instruction
+    )
+    
+    # Prepare context with database info if available
+    context_for_model = ""
+    if personalized_context:
+        context_for_model += f"Customer information:\n{personalized_context}\n\n"
+    
+    if db_context:
+        context_for_model += f"Information from our database that might help answer the query:\n{db_context}\n\n"
+    
+    # Complete prompt with user question
+    prompt = f"{context_for_model}User query: {user_message}\n\n"
+    prompt += "Please provide a helpful response based on the available information."
+    
+    try:
+        # Generate response from Gemini
+        response = model.generate_content(prompt)
+        
+        # Track metrics for monitoring
+        response_metadata = {
+            'response': response.text,
+            'db_data_used': bool(db_context),
+            'query_type': query_type, 
+            'personalized': bool(personalized_context)
+        }
+        
+        return response_metadata
+    except Exception as e:
+        print(f"Gemini API error: {str(e)}")
+        # Provide a fallback response if API fails
+        fallback_responses = {
+            "product_info": "I can help you find the perfect drone for your needs. However, I'm having trouble accessing our product database right now. Please try again in a few moments or browse our collection online.",
+            "instructor_info": "Our certified drone instructors are available for training sessions. While I can't access their details right now, you can check our 'Instructors' page to find one that matches your needs.",
+            "booking_info": "We offer personalized drone training sessions with qualified instructors. I'm having trouble accessing booking availability at the moment. Please visit our 'Book Instructor' page to see current availability.",
+            "order_info": "I can help track your orders and provide shipping information. I'm having difficulty accessing our systems right now. Please try again later or check your Order History page directly.",
+            "general": "I'm sorry, I'm having trouble connecting to my knowledge base right now. Please try again later or contact our customer service for immediate assistance."
+        }
+        
+        return {
+            'response': fallback_responses.get(query_type, fallback_responses["general"]),
+            'db_data_used': bool(db_context),
+            'error': str(e)
+        }
+
+@login_required
+def add_to_wishlist(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        if not product_id:
+            messages.error(request, 'Invalid request. Product ID is required.')
+            return redirect('index')
+            
+        try:
+            product = Product.objects.get(id=product_id)
+            customer = request.user.customer
+            
+            # Check if item already exists in wishlist
+            wishlist_item, created = Wishlist.objects.get_or_create(
+                customer=customer,
+                product=product
+            )
+            
+            if created:
+                messages.success(request, f'{product.name} has been added to your wishlist.')
+            else:
+                messages.info(request, f'{product.name} is already in your wishlist.')
+                
+        except Product.DoesNotExist:
+            messages.error(request, 'Product not found.')
+        except Exception as e:
+            messages.error(request, 'An error occurred while adding to wishlist.')
+            
+    return redirect('index')
+
+@login_required
+def remove_from_wishlist(request, product_id):
+    try:
+        customer = request.user.customer
+        wishlist_item = Wishlist.objects.get(customer=customer, product_id=product_id)
+        product_name = wishlist_item.product.name
+        wishlist_item.delete()
+        messages.success(request, f'{product_name} has been removed from your wishlist.')
+    except Wishlist.DoesNotExist:
+        messages.error(request, 'Item not found in wishlist.')
+    except Exception as e:
+        messages.error(request, 'An error occurred while removing from wishlist.')
+    
+    return redirect('view_wishlist')
+
+@login_required
+def view_wishlist(request):
+    try:
+        customer = request.user.customer
+        wishlist_items = Wishlist.objects.filter(customer=customer).select_related('product')
+        context = {
+            'wishlist_items': wishlist_items
+        }
+        return render(request, 'customer/wishlist.html', context)
+    except Exception as e:
+        messages.error(request, 'An error occurred while loading your wishlist.')
+        return redirect('index')
+    
+
+@login_required
+def index(request):
+    products = Product.objects.all()
+    cart_items_count = Cart.objects.filter(customer=request.user.customer).count()  # Count items in the cart
+    return render(request, 'index.html', {'products': products, 'cart_items_count': cart_items_count})
+
+
+@login_required
+def add_to_comparison(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        if not product_id:
+            messages.error(request, 'Product ID is required')
+            return redirect('product_list')
+            
+        try:
+            product = Product.objects.get(id=product_id)
+            comparison_list, created = ComparisonList.objects.get_or_create(user=request.user)
+            
+            # Limit to 4 products maximum
+            if comparison_list.products.count() >= 4:
+                messages.warning(request, 'You can compare up to 4 products at a time')
+                return redirect('product_list')
+                
+            comparison_list.products.add(product)
+            messages.success(request, f'{product.name} added to comparison')
+            
+        except Product.DoesNotExist:
+            messages.error(request, 'Product not found')
+        except Exception as e:
+            messages.error(request, str(e))
+            
+    return redirect('product_list')
+
+@login_required
+def remove_from_comparison(request, product_id):
+    try:
+        comparison_list = ComparisonList.objects.get(user=request.user)
+        product = Product.objects.get(id=product_id)
+        comparison_list.products.remove(product)
+        messages.success(request, f'{product.name} removed from comparison')
+    except (ComparisonList.DoesNotExist, Product.DoesNotExist):
+        messages.error(request, 'Product or comparison list not found')
+    return redirect('view_comparison')
+
+@login_required
+@login_required
+def view_comparison(request):
+    comparison_list, created = ComparisonList.objects.get_or_create(user=request.user)
+    products = comparison_list.products.all()
+    
+    # Get all unique specification keys across products
+    spec_keys = set()
+    for product in products:
+        if hasattr(product, 'specifications'):
+            spec_keys.update(product.specifications.keys())
+    
+    context = {
+        'products': products,
+        'spec_keys': sorted(spec_keys)
+    }
+    return render(request, 'customer/comparison.html', context)

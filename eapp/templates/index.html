@@ -3,6 +3,48 @@
 {% load static %}
 
 <style>
+  #chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    text-align: center;
+  }
+
+  #chatbot-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 24px;
+  }
+
+  .chatbot-options {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+  }
+
+  .chatbot-options a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    padding: 8px;
+  }
+
+  .chatbot-options a:hover {
+    background-color: #f1f1f1;
+  }
   #cart-button {
     border: none;
     background-color: #fcfcfc; /* Base color */
@@ -126,7 +168,6 @@
     font-size: 24px; /* Icon size */
   }
 </style>
-<script src="https://unpkg.com/lucide@latest"></script>
 
 <!-- slider-area start -->
 <section class="slider-area pos-relative">
@@ -258,7 +299,7 @@
     <div class="row">
       <div class="col-lg-6 col-md-12">
         <div class="banner-2 pos-relative mb-30">
-          <a href="shop.html"
+          <a href=""
             ><img src="{% static 'img/drone5.jpg' %}" width="900" 
             height="600" alt=""
           /></a>
@@ -270,7 +311,7 @@
       </div>
       <div class="col-lg-6 col-md-12">
         <div class="banner-2 pos-relative mb-30">
-          <a href="shop.html">
+          <a href="">
             <img 
               src="{% static 'img/banner/banner-2/drone1.jpg' %}" 
               alt="" 
@@ -304,52 +345,43 @@
             <div class="product-img mb-25">
               <a href="{% url 'product_detail' product.id %}">
                 <img src="{{ product.image_1.url }}" alt="" />
-                <img
-                  class="secondary-img"
-                  src="{{ product.image_2.url }}"
-                  alt=""
-                />
+                <img class="secondary-img" src="{{ product.image_2.url }}" alt="" />
               </a>
-              <div class="product-action text-center">
-                {% if product.quantity_in_stock > 0 %}
-                <form
-                  id="add-to-cart-form"
-                  action="{% url 'add_to_cart' %}"
-                  method="post"
-                >
+              <div class="product-action text-center" style="display: flex; justify-content: center; gap: 15px; align-items: center;">
+                <form id="add-to-cart-form" action="{% url 'add_to_cart' %}" method="post">
                   {% csrf_token %}
-                  <input
-                    type="hidden"
-                    name="product_id"
-                    value="{{ product.id }}"
-                  />
-                  <input type="hidden" name="quantity" value="1" />
-                  <button type="submit" id="cart-button">
-                    <i class="flaticon-shopping-cart"></i>
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" id="cart-button" style="border: none; background: none;">
+                    <i class="fas fa-shopping-cart" style="color: #2ECC71; font-size: 24px;"></i>
                   </button>
                 </form>
-              {% endif %}
-                                       
+                
                 <a href="{% url 'product_detail' product.id %}" title="Quick View">
-                  <i class="flaticon-eye"></i>
+                  <i class="fas fa-eye" style="color: #1E90FF; font-size: 24px;"></i>
                 </a>
+
+                <form action="{% url 'add_to_wishlist' %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="product_id" value="{{ product.id }}">
+                  <button type="submit" style="border: none; background: none;">
+                    <i class="far fa-heart" style="color: #FF5733; font-size: 24px;"></i>
+                  </button>
+                </form>
               </div>
             </div>
             <div class="product-content">
               <div class="pro-cat mb-10">
-                <a href="{% url 'product_detail' product.id %}">{{ product.subcategory}}</a>
-            </div>
+                <a href="{% url 'product_detail' product.id %}">{{ product.subcategory }}</a>
+              </div>
               <h3 class="product-title">
                 <a href="{% url 'product_detail' product.id %}">{{ product.name }}</a>
               </h3>
               <div class="product-meta">
                 <div class="pro-price">
-                  <span>{{ product.price }}</span>
+                  <span>RS {{ product.price }}</span>
                 </div>
               </div>
-              <div class="product-wishlist">
-                <a href="#"><i class="far fa-heart" title="Wishlist"></i></a>
-            </div>
             </div>
           </div>
         </div>
@@ -358,21 +390,54 @@
     </div>
   </div>
 </section>
-<!-- product-area end 
+<!-- product-area end -->
+
 <!-- product-area end -->
 
 <!-- Chatbot Icon -->
-<div id="chatbot-icon" onclick="window.location.href='/generate_text/'">
-  <i data-lucide="bot"></i> <!-- Lucide Chatbot Icon -->
+<div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: 'Arial', sans-serif;">
+  <!-- Floating Chatbot Icon -->
+  <div id="chatbot-icon" onclick="toggleOptions()" style="background: rgba(0, 82, 212, 0.9); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); transition: all 0.3s ease-in-out;">
+    <i class="fas fa-comments" style="font-size: 26px;"></i>
+  </div>
+
+  <!-- Chatbot Options Menu -->
+  <div id="options" style="display: none; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); border-radius: 12px; padding: 14px; position: absolute; bottom: 75px; right: 0; min-width: 240px; text-align: left;">
+    <a href="/generate_text/" style="display: flex; align-items: center; padding: 14px; text-decoration: none; color: #222; font-weight: 600; border-radius: 8px; transition: background 0.3s ease-in-out;">
+      <i class="fas fa-brain" style="margin-right: 14px; color: #0052D4; font-size: 22px;"></i> AI Chatbot
+    </a>
+    <a href="/chatbot/" style="display: flex; align-items: center; padding: 14px; text-decoration: none; color: #222; font-weight: 600; border-radius: 8px; transition: background 0.3s ease-in-out;">
+      <i class="fas fa-shopping-cart" style="margin-right: 14px; color: #28a745; font-size: 22px;"></i> Quick Buy Bot
+    </a>
+  </div>
 </div>
+
 <script>
-  lucide.createIcons(); // Activate Lucide Icons
+  function toggleOptions() {
+    var options = document.getElementById("options");
+    options.style.display = options.style.display === "block" ? "none" : "block";
+  }
 </script>
+
 
 <!-- Include Font Awesome -->
 <link
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
   rel="stylesheet"
 />
+<script>
+  function toggleOptions() {
+    var options = document.getElementById("options");
+    options.style.display = options.style.display === "block" ? "none" : "block";
+  }
 
+  // Close options if clicked outside
+  document.addEventListener("click", function(event) {
+    var chatbotContainer = document.getElementById("chatbot-container");
+    var options = document.getElementById("options");
+    if (!chatbotContainer.contains(event.target)) {
+      options.style.display = "none";
+    }
+  });
+</script>
 {% endblock %}
